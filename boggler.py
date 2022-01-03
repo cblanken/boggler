@@ -1,8 +1,6 @@
 import sys
 from copy import deepcopy
 
-WORDLISTS_PATH = './wordlists/all/'
-
 def readBoggleFile(file):
     with open(file, 'r') as f:
         return [x.rstrip() for x in f.readlines()]
@@ -21,7 +19,7 @@ def getAdjacentIndexes(board, row, col):
             indexes.append((row-1, col-1)) # up-left
         if col < maxWidth:
             indexes.append((row-1, col+1)) # up-right
-    if row < maxWidth:
+    if row < maxHeight:
         indexes.append((row+1, col)) # down
         if col > 0:
             indexes.append((row+1, col-1)) # down-left
@@ -62,12 +60,12 @@ def findWordsByIndex(board, wordlist, row, col, depth, adjacentIndexes, prefix =
 
     return foundWords
 
-def findWords(board, adjacentIndexes, maxDepth = 5, prefixes = None, prefixLen = 0):
+def findWords(board, adjacentIndexes,  wordlistPath, maxDepth = 5, prefixes = None, prefixLen = 0):
     words = {}
     for row in range(len(board)):
         for col in range(len(board[0])):
             # Find words for each row/col starting points
-            wordlist = readWordlist(WORDLISTS_PATH + 'words_' + board[row][col] + '.txt')
+            wordlist = readWordlist(wordlistPath + 'words_' + board[row][col] + '.txt')
             newWords = findWordsByIndex(board, wordlist, row, col, 0, adjacentIndexes, prefixes = prefixes, maxDepth = maxDepth, prefixLen = prefixLen)
             for w,v in newWords.items():
                 # Add and increment word counts
@@ -77,8 +75,8 @@ def findWords(board, adjacentIndexes, maxDepth = 5, prefixes = None, prefixLen =
 
 
 if __name__ == '__main__':
-    if len(sys.argv) != 3:
-        print('Usage: python3 blogger.py BOARD_FILE MAX_WORD_LENGTH')
+    if len(sys.argv) != 5:
+        print('Usage: python3 blogger.py BOARD_FILE MAX_WORD_LENGTH PREFIX_FILE WORDLISTS_PATH')
     else:
         board = readBoggleFile(sys.argv[1])
         print(board)
@@ -90,11 +88,7 @@ if __name__ == '__main__':
         adjacentLetters = {k:[board[pos[0]][pos[1]] for pos in v] for (k,v) in adjacentIndexes.items()}
 
         maxSize = int(sys.argv[2], 10)
-        prefixes = readWordlist('./wordlists/all/prefix4.txt')
-        words = findWords(board, adjacentIndexes, maxSize, prefixes, 4)
-        #words = findWords(board, adjacentIndexes, maxSize)
+        prefixes = readWordlist(sys.argv[3])
+        words = findWords(board, adjacentIndexes, sys.argv[4], maxSize, prefixes, 4)
         for w in words:
             print(w)
-
-        #words = [w for w in words if len(w) > 2]
-        #print([w for w in words if len(w) == 3])
