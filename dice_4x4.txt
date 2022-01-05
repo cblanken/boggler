@@ -1,0 +1,18 @@
+front,right,back,left,top,bottom (start with 'one of' the first alphabetical chars
+-----------
+a,h,s,p,o,c
+e,r,l,i,x,d
+a,g,a,e,e,a
+e,y,t,l,r,t
+e,o,t,s,s,i
+d,r,y,v,l,e
+h,n,l,n,z,r
+e,r,w,t,v,h
+h,i,u,n,m,qu
+e,e,h,n,w,g 
+d,t,y,t,i,s
+a,b,b,o,o,j
+e,i,u,n,s,e
+a,s,p,f,k,f 
+c,m,u,o,i,t 
+a,w,t,o,o,t
