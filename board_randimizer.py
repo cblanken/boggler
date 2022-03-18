@@ -1,5 +1,6 @@
 from sys import argv
 from random import randint
+from math import sqrt
 
 def readDiceFile(path):
     with open(path, 'r+') as f:
@@ -30,5 +31,9 @@ if __name__ == '__main__':
         print('Usage: python3 board_randomizer DICE_FILE')
     else:
         dice = readDiceFile(argv[1])
-        print(dice)
-        print(rollDice(dice))
+        rolls = rollDice(dice)
+
+        # Format dice rolls for boards file
+        board_size = int(sqrt(len(rolls)))
+        for i in range(0, len(dice), board_size):
+            print("".join(rolls[i:i+board_size]))
