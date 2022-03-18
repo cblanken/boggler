@@ -1,5 +1,5 @@
 from sys import argv
-from random import randint
+from random import randint, shuffle
 from math import sqrt
 
 def readDiceFile(path):
@@ -31,6 +31,7 @@ if __name__ == '__main__':
         print('Usage: python3 board_randomizer DICE_FILE')
     else:
         dice = readDiceFile(argv[1])
+        shuffle(dice) 
         rolls = rollDice(dice)
 
         # Format dice rolls for boards file
