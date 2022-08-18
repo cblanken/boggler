@@ -1,38 +1,39 @@
+#!/bin/python
 from sys import argv
 from random import randint, shuffle
 from math import sqrt
 
-def readDiceFile(path):
-    with open(path, 'r+') as f:
+def read_dice_file(path):
+    with open(path, 'r+', encoding="utf-8") as file:
         # Ignore first two lines
-        f.readline()
-        f.readline()
+        file.readline()
+        file.readline()
         dice = []
-        line = ''.join(f.readline().rstrip().split(','))
+        line = ''.join(file.readline().rstrip().split(','))
         while(line):
             dice.append(line)
-            line = ''.join(f.readline().rstrip().split(','))
+            line = ''.join(file.readline().rstrip().split(','))
 
         return dice
 
-def rollDie(die):
+def roll_die(die):
     return str(die[randint(0, len(die) - 1)])
 
-def rollDice(dice):
+def roll_dice(dice):
     rolls = []
     for die in dice:
-        roll = rollDie(die)
+        roll = roll_die(die)
         rolls.append(roll)
 
     return rolls
 
 if __name__ == '__main__':
     if len(argv) != 2:
-        print('Usage: python3 board_randomizer DICE_FILE')
+        print('Usage: python3 <board_randomizer.py> <dice_file>')
     else:
-        dice = readDiceFile(argv[1])
+        dice = read_dice_file(argv[1])
         shuffle(dice) 
-        rolls = rollDice(dice)
+        rolls = roll_dice(dice)
 
         # Format dice rolls for boards file
         board_size = int(sqrt(len(rolls)))
