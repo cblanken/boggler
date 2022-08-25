@@ -5,26 +5,64 @@ from __future__ import annotations
 class BoardCell:
     '''Boggle Board cell'''
     def __init__(self, row: int, col: int, letter: str, adjacent_indexes: list[list[str]]) -> BoardCell:
-        self.row = row
-        self.col = col
-        self.letter = letter
-        self.adjacent_indexes = adjacent_indexes
+        self.__row = row
+        self.__col = col
+        self.__letter = letter
+        self.__adjacent_indexes = adjacent_indexes
+
+    @property
+    def row(self) -> int:
+        '''Getter for row property'''
+        return self.__row
+
+    @property
+    def col(self) -> int:
+        '''Getter for col property'''
+        return self.__col
+
+    @property
+    def letter(self) -> str:
+        '''Getter for letter property'''
+        return self.__letter
+
+    @property
+    def adjacent_indexes(self) -> list[list[str]]:
+        '''Getter for adjacent_indexes property'''
+        return self.__row
 
     def __str__(self):
-        return f"({self.row}, {self.col}: {self.letter}. Adjacent nodes: {self.adjacent_indexes})"
+        return f"({self.__row}, {self.__col}: {self.__letter}. Adjacent nodes: {self.__adjacent_indexes})"
 
 class BoggleBoard:
     '''Boggle board structure'''
     def __init__(self, board: list[list[str]], max_word_len: int = 14) -> BoggleBoard:
-        self.height: int = len(board)
-        self.width: int = len(board[0]) if self.height > 0 else 0
-        self.max_word_len = min(max_word_len, self.width * self.height)   # max word length is determined by size of the board
-        self.board = {}
-        for row in range(0, self.height):
-            for col in range(0, self.width):
+        self.__height: int = len(board)
+        self.__width: int = len(board[0]) if self.__height > 0 else 0
+        self.__max_word_len = min(max_word_len, self.__width * self.__height)   # max word length is determined by size of the board
+        self.__board = {}
+        for row in range(0, self.__height):
+            for col in range(0, self.__width):
                 #self.adjacency_dict[(row, col)] = self.__get_adjacent_indexes(row, col)
                 adjacent_indexes = self.__get_adjacent_indexes(row, col)
-                self.board[(row, col)] = BoardCell(row, col, board[row][col], adjacent_indexes)
+                self.__board[(row, col)] = BoardCell(row, col, board[row][col], adjacent_indexes)
+
+    @property
+    def height(self) -> int:
+        '''Getter for height property'''
+        return self.__height
+
+    @property
+    def width(self) -> int:
+        '''Getter for width property'''
+        return self.__width
+    @property
+    def max_word_len(self) -> int:
+        '''Getter for maximum word length property'''
+        return self.__max_word_len
+    @property
+    def board(self) -> dict((int, int), BoardCell):
+        '''Getter for board property'''
+        return self.__board
 
     def __get_adjacent_indexes(self, row, col):
         '''Return adjecency list for board of size `row x col`'''
@@ -33,31 +71,32 @@ class BoggleBoard:
             indexes.append((row-1, col)) # up
             if col > 0:
                 indexes.append((row-1, col-1)) # up-left
-            if col < self.width:
+            if col < self.__width:
                 indexes.append((row-1, col+1)) # up-right
-        if row < self.height:
+        if row < self.__height:
             indexes.append((row+1, col)) # down
             if col > 0:
                 indexes.append((row+1, col-1)) # down-left
-            if col < self.width:
+            if col < self.__width:
                 indexes.append((row+1, col+1)) # down-right
         if col > 0:
             indexes.append((row, col-1)) # left
-        if col < self.width:
+        if col < self.__width:
             indexes.append((row, col+1)) # right
         return indexes
 
     def get_letter_at(self, row: int, col: int) -> str:
         '''Return the value at the specified row x column'''
-        return self.board[row][col]
+        return self.__board[row][col]
 
 class WordNode:
     '''A node that indicates a single letter in a word. Used to populate a WordTree'''
-    def __init__(self, char: str, is_word: bool, parent: WordNode = None, children: dict[WordNode] = None) -> WordNode:
+    def __init__(self, char: str, is_word: bool, parent: WordNode = None, children: dict[WordNode] = None, board_pos = None) -> WordNode:
         self.char = char
         self.is_word = is_word
         self.children = children if children is not None else {}
         self.parent = parent
+        self.board_pos = board_pos
 
     def add_child_node(self, node):
         '''Add child node to `children` dictionary, indexed by the nodes' `char`'''
@@ -89,7 +128,7 @@ class WordTree:
     def __str__(self):
         return ", ".join(self.wordlist)
 
-    def __insert_letter(self, letter: str, parent: WordNode):
+    def insert_letter(self, letter: str, parent: WordNode):
         '''Create WordNode for `letter` and into WordTree under `parent`'''
         parent.children[letter] = WordNode(letter, False, parent)
 
@@ -102,7 +141,7 @@ class WordTree:
         for letter in word[1:self.max_word_len]:
             # Insert new WordNode for each letter that doesen't already exist in the tree
             if letter not in curr_node.children:
-                self.__insert_letter(letter, curr_node)
+                self.insert_letter(letter, curr_node)
                 # print(letter)
             curr_node = curr_node.children[letter]
         # Mark the last node of the word
@@ -143,7 +182,9 @@ class WordTree:
             for pos in sub_tree.active_node.adjacent_indexes:
                 letter = boggle_board.board[pos]
                 if pos not in used_nodes and letter in dict_ptr.children:
-                    sub_tree.active_node.children[letter] = dict_ptr.children[letter]
+                    sub_tree.insert_letter(letter, sub_tree.active_node)
+                    #sub_tree.active_node.children[letter] = dict_ptr.children[letter]
+
                     # TODO: find way to track used_nodes to avoid loops
                     # either check the word path by recursing up via the parents
                     # or pass it along, probably rework WordNode or BoardCell or make
@@ -176,13 +217,13 @@ if __name__ == "__main__":
     print(tree.search('anger'))
     print(tree.search('argues'))
 
-    board = [
+    b1 = [
         "aucd",
         "eegh",
         "hios",
         "trea"
     ]
 
-    boggle_board = BoggleBoard(board)
-    sub_tree = tree.generate_board_sub_tree(boggle_board, boggle_board.board[(3, 3)])
+    b1_board = BoggleBoard(b1)
+    sub_tree = tree.generate_board_sub_tree(b1_board, b1_board.board[(3, 3)])
     print(sub_tree.search("anger"))
