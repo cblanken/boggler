@@ -1,6 +1,8 @@
 '''Boggler Utils'''
 
 from __future__ import annotations
+from os import path
+import sys
 
 class BoardCell:
     '''Boggle Board cell'''
@@ -41,7 +43,7 @@ class BoardCell:
         self.__adjacent_cells = value
 
     def __str__(self):
-        return f"({self.__row}, {self.__col}: {self.__letter} | {self.__adjacent_cells})"
+        return f"({self.__row}, {self.__col}): {self.__letter}"
 
 class BoggleBoard:
     '''Boggle board structure'''
@@ -234,7 +236,7 @@ class WordTree:
             curr_node = curr_node.children[letter]
         # Mark the last node of the word
         curr_node.is_word = len(word) <= self.max_word_len
-        print(f"Added: {word[:self.max_word_len]}")
+        #print(f"Added: {word[:self.max_word_len]}")
         return True
 
     def search(self, word: str) -> WordNode:
@@ -264,15 +266,15 @@ class WordTree:
         # TODO rework active_node refs for recursion so don't have to be reset to parent at every point of return
         if self.active_node.is_word and len(self.active_node.children) == 0:
             word_path = subtree.active_node.path[::-1]
-            print("WORD FOUND:", "".join([board.board[x].letter for x in word_path]), word_path)
+            # print("WORD FOUND:", "".join([board.board[x].letter for x in word_path]), word_path)
             self.active_node = self.active_node.parent
             subtree.active_node = subtree.active_node.parent
             return
         elif self.active_node.is_word:
             word_path = subtree.active_node.path[::-1]
-            print("WORD FOUND:", "".join([board.board[x].letter for x in word_path]), word_path)
+            # print("WORD FOUND:", "".join([board.board[x].letter for x in word_path]), word_path)
         elif depth > self.max_word_len:
-            print(f"MAX DEPTH REACHED! Depth = {depth}")
+            # print(f"MAX DEPTH REACHED! Depth = {depth}")
             self.active_node = self.active_node.parent
             subtree.active_node = subtree.active_node.parent
             return
@@ -285,25 +287,48 @@ class WordTree:
                 subtree.active_node.add_child_node(new_node)
                 subtree.active_node = subtree.active_node.children[cell.letter] # update subtree pointer
                 self.active_node = self.active_node.children[cell.letter] # update dictionary tree pointer
-                self.build_boggle_tree(board, board.board[cell.pos], subtree)
+                self.build_boggle_tree(board, board.board[cell.pos], subtree, depth=depth+1)
 
-        print(f"DONE SEARCHING at {subtree.active_node}")
+        # print(f"DONE SEARCHING at {subtree.active_node}")
 
         self.active_node = self.active_node.parent
         subtree.active_node = subtree.active_node.parent
         return subtree
+
+def build_full_boggle_tree(board: BoggleBoard, wordlist_path: str) -> dict[str, WordTree]:
+    '''Return dictionary of WordTree(s) for every letter on a BoggleBoard'''
+    alphabet = "".join(sorted(set([cell.letter for cell in board.board.values()])))
+    board_tree = {}
+    index = {}
+    
+    print("Reading in wordlists...")
+    # alphabet = "abcdefghijklmnopqrstuvwxyz"
+    for letter in alphabet:
+        filename = "words_" + letter + ".txt"
+        print(f">> {letter}: {filename}")
+        wordlist = read_wordlist(path.join(path.abspath(wordlist_path), filename))
+        index[letter] = wordlist
+
+    print("Generating WordTrees")
+    for cell in board.board.values():
+        print(cell)
+        dict_tree = WordTree(alphabet, WordNode(cell.letter), index[cell.letter])
+        sub_tree = WordTree(alphabet, WordNode(cell.letter, False, board_pos=cell.pos))
+        board_tree[cell.pos] = dict_tree.build_boggle_tree(board, cell, sub_tree)
+
+    return board_tree
 
 def read_wordlist(file):
     '''Return dictionary of words with associated word count (1 by default)'''
     with open(file, 'r', encoding='utf-8') as file:
         return {k:1 for k in file.read().split()}
 
+def read_boggle_file(file):
+    '''Return list of rows from Boggle board file'''
+    with open(file, 'r', encoding='utf-8') as file:
+        return [x.rstrip() for x in file.readlines()]
 
 if __name__ == "__main__":
-
-    sample_dict = read_wordlist("wordlists/dwyl/words_a.txt")
-    sample_tree = WordTree("abcdefghijklmnopqrstuvwxyz", WordNode("a"), sample_dict)
-    print("=" * 50)
 
     b2 = [
         "iats",
@@ -313,8 +338,15 @@ if __name__ == "__main__":
     ]
 
     b2_board = BoggleBoard(b2)
-    start_pos = (0,1)
-    b2_tree = WordTree("abcdefghijklmnopqrstuvwxyz", WordNode("a", False, board_pos=start_pos))
-    sub_tree = sample_tree.build_boggle_tree(b2_board, b2_board.board[start_pos], b2_tree)
 
-    # TODO add function to grab alphabet from board and generate WordTree for each start cell
+    # sample_dict = read_wordlist("wordlists/dwyl/words_a.txt")
+    #sample_tree = WordTree("abcdefghijklmnopqrstuvwxyz", WordNode("a"), sample_dict)
+    #print("=" * 50)
+
+    #start_pos = (0,1)
+    #b2_tree = WordTree("abcdefghijklmnopqrstuvwxyz", WordNode("a", False, board_pos=start_pos))
+    #sub_tree = sample_tree.build_boggle_tree(b2_board, b2_board.board[start_pos], b2_tree)
+
+    # TODO fix dict[value] type hints to dict[key, value]
+
+    boggle_tree = build_full_boggle_tree(b2_board, "wordlists/dwyl")
