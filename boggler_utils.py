@@ -1,7 +1,6 @@
 '''Boggler Utils'''
 
 from __future__ import annotations
-from multiprocessing import Pool
 
 class BoardCell:
     '''Boggle Board cell'''
@@ -36,7 +35,7 @@ class BoardCell:
     def adjacent_cells(self) -> list[BoardCell]:
         '''Getter for adjacent_cells property'''
         return self.__adjacent_cells
-    
+
     @adjacent_cells.setter
     def adjacent_cells(self, value):
         self.__adjacent_cells = value
@@ -76,10 +75,12 @@ class BoggleBoard:
     def width(self) -> int:
         '''Getter for width property'''
         return self.__width
+
     @property
     def max_word_len(self) -> int:
         '''Getter for maximum word length property'''
         return self.__max_word_len
+
     @property
     def board(self) -> dict((int, int), BoardCell):
         '''Getter for board property'''
@@ -112,12 +113,41 @@ class BoggleBoard:
 
 class WordNode:
     '''A node describing a single letter in a WordTree.'''
-    def __init__(self, char: str, is_word: bool, parent: WordNode = None, children: dict[WordNode] = None, board_pos = None) -> WordNode:
-        self.char = char
-        self.is_word = is_word
-        self.children = children if children is not None else {}
-        self.parent = parent
-        self.board_pos = board_pos
+    def __init__(self, letter: str, is_word: bool = False, parent: WordNode = None, children: dict[WordNode] = None, board_pos = None) -> WordNode:
+        self.__letter = letter
+        self.__is_word = is_word
+        self.__children = children if children is not None else {}
+        self.__parent = parent
+        self.__board_pos = board_pos
+
+    @property
+    def char(self) -> str:
+        '''Getter for char property'''
+        return self.__letter
+
+    @property
+    def is_word(self) -> bool:
+        '''Getter for is_word property'''
+        return self.__is_word
+    
+    @is_word.setter
+    def is_word(self, value):
+        self.__is_word = value
+
+    @property
+    def children(self) -> dict[WordNode]:
+        '''Getter for children property'''
+        return self.__children
+
+    @property
+    def parent(self) -> WordNode:
+        '''Getter for parent property'''
+        return self.__parent
+
+    @property
+    def board_pos(self) -> (int, int):
+        '''Getter for board_pos property'''
+        return self.__board_pos
 
     def add_child_node(self, node):
         '''Add child node to `children` dictionary, indexed by the nodes' `char`'''
@@ -136,7 +166,6 @@ class WordNode:
         return path
 
     def __str__(self):
-        # return f"WordNode: {self.char}, {self.is_word}, {self.children}"
         return f"WordNode: {self.char}, {self.is_word}"
 
     def __repr__(self):
@@ -144,26 +173,50 @@ class WordNode:
 
 class WordTree:
     '''A tree populated by WordNode(s) to complete words from a given root letter and wordlist'''
-    def __init__(self, alphabet: str, root: str, words: list[str] = None, max_word_len = 16) -> WordTree:
-        self.alphabet = alphabet
-        self.wordlist = words
-        self.root = root
-        self.max_word_len = max_word_len
-        self.tree = {}
+    def __init__(self, alphabet: str, root: WordNode, words: list[str] = None, max_word_len = 16) -> WordTree:
+        self.__alphabet = alphabet
+        self.__wordlist = words
+        self.__root = root
+        self.__max_word_len = max_word_len
+        self.__tree = {}
 
         # Generate root node
-        self.tree[root] = WordNode(root, False)
-        self.active_node: WordNode = self.tree[root]
+        self.__tree[root.char] = root
+        self.active_node: WordNode = self.__tree[root.char]
 
         # Populate tree from wordlist
         if words is not None:
             for word in words:
                 self.__insert_word(word)
 
+    @property
+    def alphabet(self) -> str:
+        '''Getter for alphabet property'''
+        return self.__alphabet
+
+    @property
+    def wordlist(self) -> list[str]:
+        '''Getter for wordlist property'''
+        return self.__wordlist
+
+    @property
+    def root(self) -> str:
+        '''Getter for root property'''
+        return self.__root
+
+    @property
+    def max_word_len(self) -> int:
+        '''Getter for max_word_len property'''
+        return self.__max_word_len
+
+    @property
+    def tree(self) -> dict[str]:
+        '''Getter for tree property'''
+        return self.__tree
 
     def __str__(self):
         return ", ".join(self.wordlist)
-
+    
     def insert_letter(self, letter: str, parent: WordNode, is_word: bool = False, children: dict[WordNode] = None, board_pos = None):
         '''Create WordNode for `letter` and into WordTree under `parent`'''
         node = WordNode(letter, is_word, parent, children, board_pos)
@@ -171,15 +224,13 @@ class WordTree:
 
     def __insert_word(self, word: str) -> bool:
         '''Returns True if word was inserted into the tree, otherwise False'''
-        if word is None or word[0] != self.root:
+        if word is None or word[0] != self.root.char:
             return False
         curr_node = self.tree[word[0]]
-        # print(word[0])
         for letter in word[1:self.max_word_len]:
             # Insert new WordNode for each letter that doesen't already exist in the tree
             if letter not in curr_node.children:
                 self.insert_letter(letter, curr_node)
-                # print(letter)
             curr_node = curr_node.children[letter]
         # Mark the last node of the word
         curr_node.is_word = len(word) <= self.max_word_len
@@ -229,11 +280,7 @@ class WordTree:
         # Branch for each adjacent board cell
         for cell in board_cell.adjacent_cells:
             # Check dictionary and exclude nodes already in path
-            print("Cell:", cell.letter, cell.pos, subtree.active_node.path)
             if cell.letter in self.active_node.children and cell.pos not in subtree.active_node.path:
-                # print(cell)
-                print(self.active_node)
-                #subtree.insert_letter(cell.letter, subtree.active_node, self.active_node.is_word, board_pos=cell.pos)
                 new_node = WordNode(cell.letter, self.active_node.is_word, subtree.active_node, board_pos = cell.pos)
                 subtree.active_node.add_child_node(new_node)
                 subtree.active_node = subtree.active_node.children[cell.letter] # update subtree pointer
@@ -253,38 +300,10 @@ def read_wordlist(file):
 
 
 if __name__ == "__main__":
-    # sample_dict = [
-    #     'aero',
-    #     'anger',
-    #     'ant',
-    #     'ape',
-    #     'argue',
-    #     'ash',
-    #     'assuage',
-    #     'aunt',
-    #     'auspice',
-    #     'bigger',
-    #     'bit',
-    #     'bite',
-    #     'biter',
-    #     'cart',
-    #     'cast',
-    # ]
 
     sample_dict = read_wordlist("wordlists/dwyl/words_a.txt")
-
-    tree = WordTree("abcdefghijklmnopqrstuvwxyz", "a", sample_dict)
-    n1 = tree.search('anger')
-    #print(n1.path)
-    #print(tree.search('argues'))
+    sample_tree = WordTree("abcdefghijklmnopqrstuvwxyz", WordNode("a"), sample_dict)
     print("=" * 50)
-
-    b1 = [
-        "aucd",
-        "eegh",
-        "hios",
-        "trea"
-    ]
 
     b2 = [
         "iats",
@@ -293,16 +312,9 @@ if __name__ == "__main__":
         "yegc"
     ]
 
-    b1_board = BoggleBoard(b1)
     b2_board = BoggleBoard(b2)
+    start_pos = (0,1)
+    b2_tree = WordTree("abcdefghijklmnopqrstuvwxyz", WordNode("a", False, board_pos=start_pos))
+    sub_tree = sample_tree.build_boggle_tree(b2_board, b2_board.board[start_pos], b2_tree)
 
-    b1_tree = WordTree("abcdefghijklmnopqrstuvwxyz", "a")
-    b1_tree.tree["a"].board_pos = (3,3)
-
-    b2_tree = WordTree("abcdefghijklmnopqrstuvwxyz", "a")
-    b2_tree.tree["a"].board_pos = (0,1)
-
-    #sub_tree = tree.build_boggle_tree(b1_board, b1_board.board[(0,0)], b1_tree)
-    sub_tree = tree.build_boggle_tree(b2_board, b2_board.board[(2,2)], b2_tree)
-    #sub_tree = tree.build_board_sub_tree(b1_board, b1_board.board[(3, 3)])
-    #print(sub_tree.search("anger"))
+    # TODO add function to grab alphabet from board and generate WordTree for each start cell
