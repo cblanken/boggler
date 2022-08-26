@@ -1,5 +1,4 @@
-front,right,back,left,top,bottom (start with 'one of' the first alphabetical chars
------------
+# front,right,back,left,top,bottom (start with 'one of' the first alphabetical chars
 a,h,s,p,o,c
 e,r,l,i,x,d
 a,g,a,e,e,a

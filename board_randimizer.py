@@ -4,6 +4,7 @@ from random import randint, shuffle
 from math import sqrt
 
 def read_dice_file(path):
+    # TODO: Factor in 'qu' die face
     '''Return list of die strings from file ignoring all comments (#)'''
     with open(path, 'r+', encoding="utf-8") as file:
         return [''.join(line.rstrip().split(',')) for line in file.readlines() if line[0] != "#"]
