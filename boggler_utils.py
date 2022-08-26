@@ -58,7 +58,6 @@ class BoggleBoard:
         # Generate BoardCell for each position on the board
         for row in range(0, self.__height):
             for col in range(0, self.__width):
-                #self.adjacency_dict[(row, col)] = self.__get_adjacent_indexes(row, col)
                 self.__board[(row, col)] = BoardCell(row, col, board[row][col])
 
         # Update adjacent cell references for each BoardCell
@@ -115,7 +114,7 @@ class BoggleBoard:
 
 class WordNode:
     '''A node describing a single letter in a WordTree.'''
-    def __init__(self, letter: str, is_word: bool = False, parent: WordNode = None, children: dict[WordNode] = None, board_pos = None) -> WordNode:
+    def __init__(self, letter: str, is_word: bool = False, parent: WordNode = None, children: dict[str, WordNode] = None, board_pos = None) -> WordNode:
         self.__letter = letter
         self.__is_word = is_word
         self.__children = children if children is not None else {}
@@ -137,7 +136,7 @@ class WordNode:
         self.__is_word = value
 
     @property
-    def children(self) -> dict[WordNode]:
+    def children(self) -> dict[str, WordNode]:
         '''Getter for children property'''
         return self.__children
 
@@ -212,14 +211,14 @@ class WordTree:
         return self.__max_word_len
 
     @property
-    def tree(self) -> dict[str]:
+    def tree(self) -> dict[str, WordNode]:
         '''Getter for tree property'''
         return self.__tree
 
     def __str__(self):
         return ", ".join(self.wordlist)
-    
-    def insert_letter(self, letter: str, parent: WordNode, is_word: bool = False, children: dict[WordNode] = None, board_pos = None):
+
+    def insert_letter(self, letter: str, parent: WordNode, is_word: bool = False, children: dict[str, WordNode] = None, board_pos = None):
         '''Create WordNode for `letter` and into WordTree under `parent`'''
         node = WordNode(letter, is_word, parent, children, board_pos)
         parent.add_child_node(node)
@@ -300,9 +299,8 @@ def build_full_boggle_tree(board: BoggleBoard, wordlist_path: str) -> dict[str, 
     alphabet = "".join(sorted(set([cell.letter for cell in board.board.values()])))
     board_tree = {}
     index = {}
-    
+
     print("Reading in wordlists...")
-    # alphabet = "abcdefghijklmnopqrstuvwxyz"
     for letter in alphabet:
         filename = "words_" + letter + ".txt"
         print(f">> {letter}: {filename}")
@@ -346,7 +344,5 @@ if __name__ == "__main__":
     #start_pos = (0,1)
     #b2_tree = WordTree("abcdefghijklmnopqrstuvwxyz", WordNode("a", False, board_pos=start_pos))
     #sub_tree = sample_tree.build_boggle_tree(b2_board, b2_board.board[start_pos], b2_tree)
-
-    # TODO fix dict[value] type hints to dict[key, value]
 
     boggle_tree = build_full_boggle_tree(b2_board, "wordlists/dwyl")
