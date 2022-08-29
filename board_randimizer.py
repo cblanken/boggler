@@ -7,7 +7,7 @@ def read_dice_file(path):
     # TODO: Factor in 'qu' die face
     '''Return list of die strings from file ignoring all comments (#)'''
     with open(path, 'r+', encoding="utf-8") as file:
-        return [''.join(line.rstrip().split(',')) for line in file.readlines() if line[0] != "#"]
+        return [line.rstrip().split(',') for line in file.readlines() if line[0] != "#"]
 
 def roll_die(die: str):
     '''Return a face of the given die string to simulate rolling a die'''
@@ -28,4 +28,4 @@ if __name__ == '__main__':
         # Format dice rolls for boards file
         board_size = int(sqrt(len(rolls)))
         for i in range(0, len(dice_strings), board_size):
-            print("".join(rolls[i:i+board_size]))
+            print(",".join(rolls[i:i+board_size]))
