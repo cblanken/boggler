@@ -2,15 +2,16 @@
 
 from __future__ import annotations
 from os import path
+from itertools import islice
 import sys
 
 class BoardCell:
     '''Boggle Board cell'''
-    def __init__(self, row: int, col: int, letter: str, adjacent_cells: list[BoardCell] = None) -> BoardCell:
+    def __init__(self, row: int, col: int, letters: str, adjacent_cells: list[BoardCell] = None) -> BoardCell:
         self.__row: int = row
         self.__col: int = col
         self.__pos: (int, int) = (self.__row, self.__col)
-        self.__letter: str = letter
+        self.__letters: str = letters
         self.__adjacent_cells: list[BoardCell] = adjacent_cells
 
     @property
@@ -29,9 +30,9 @@ class BoardCell:
         return self.__pos
 
     @property
-    def letter(self) -> str:
+    def letters(self) -> str:
         '''Getter for letter property'''
-        return self.__letter
+        return self.__letters
 
     @property
     def adjacent_cells(self) -> list[BoardCell]:
@@ -43,7 +44,10 @@ class BoardCell:
         self.__adjacent_cells = value
 
     def __str__(self):
-        return f"({self.__row}, {self.__col}): {self.__letter}"
+        return f"({self.__row}, {self.__col}): {self.__letters}"
+
+    def __repr__(self):
+        return f"({self.__row}, {self.__col}): {self.__letters}"
 
 class BoggleBoard:
     '''Boggle board structure'''
@@ -114,23 +118,23 @@ class BoggleBoard:
 
 class WordNode:
     '''A node describing a single letter in a WordTree.'''
-    def __init__(self, letter: str, is_word: bool = False, parent: WordNode = None, children: dict[str, WordNode] = None, board_pos = None) -> WordNode:
-        self.__letter = letter
+    def __init__(self, letters: str, is_word: bool = False, parent: WordNode = None, children: dict[str, WordNode] = None, board_pos = None) -> WordNode:
+        self.__letters = letters
         self.__is_word = is_word
         self.__children = children if children is not None else {}
         self.__parent = parent
         self.__board_pos = board_pos
 
     @property
-    def char(self) -> str:
-        '''Getter for char property'''
-        return self.__letter
+    def letters(self) -> str:
+        '''Getter for letter property'''
+        return self.__letters
 
     @property
     def is_word(self) -> bool:
         '''Getter for is_word property'''
         return self.__is_word
-    
+
     @is_word.setter
     def is_word(self, value):
         self.__is_word = value
@@ -151,8 +155,8 @@ class WordNode:
         return self.__board_pos
 
     def add_child_node(self, node):
-        '''Add child node to `children` dictionary, indexed by the nodes' `char`'''
-        self.children[node.char] = node
+        '''Add child node to `children` dictionary, indexed by the nodes' `letter`'''
+        self.children[node.letters] = node
 
     @property
     def path(self) -> list[WordNode]:
@@ -167,7 +171,7 @@ class WordNode:
         return path
 
     def __str__(self):
-        return f"WordNode: {self.char}, {self.is_word}"
+        return f"WordNode: {self.letters}, {self.is_word}"
 
     def __repr__(self):
         return self.__str__()
@@ -175,16 +179,16 @@ class WordNode:
 class WordTree:
     '''A tree populated by WordNode(s) to complete words from a given root letter and wordlist'''
     def __init__(self, alphabet: str, root: WordNode, words: list[str] = None, max_word_len = 16) -> WordTree:
-        self.__alphabet = alphabet
-        self.__wordlist = words
-        self.__root = root
-        self.__max_word_len = max_word_len
-        self.__tree = {}
-        self.__leaf_nodes = []
+        self.__alphabet: str = alphabet
+        self.__wordlist: list[str] = words
+        self.__root: WordNode = root
+        self.__max_word_len: int = max_word_len
+        self.__tree: dict[str, WordNode] = {}
+        self.__leaf_nodes: dict[str, list[WordNode]] = []
 
         # Generate root node
-        self.__tree[root.char] = root
-        self.active_node: WordNode = self.__tree[root.char]
+        self.__tree[root.letters] = root
+        self.active_node: WordNode = self.__tree[root.letters]
 
         # Populate tree from wordlist
         if words is not None:
@@ -202,7 +206,7 @@ class WordTree:
         return self.__wordlist
 
     @property
-    def root(self) -> str:
+    def root(self) -> WordNode:
         '''Getter for root property'''
         return self.__root
 
@@ -228,38 +232,75 @@ class WordTree:
     def __str__(self):
         return ", ".join(self.wordlist)
 
-    def insert_letter(self, letter: str, parent: WordNode, is_word: bool = False, children: dict[str, WordNode] = None, board_pos = None):
-        '''Create WordNode for `letter` and into WordTree under `parent`'''
-        node = WordNode(letter, is_word, parent, children, board_pos)
+    def insert_node(self, letters: str, parent: WordNode, is_word: bool = False, children: dict[str, WordNode] = None, board_pos = None):
+        '''Create WordNode for `letters` and into WordTree under `parent`'''
+        node = WordNode(letters, is_word, parent, children, board_pos)
         parent.add_child_node(node)
 
     def __insert_word(self, word: str) -> bool:
-        '''Returns True if word was inserted into the tree, otherwise False'''
-        if word is None or word[0] != self.root.char:
+        '''Returns True if the word could be inserted into the tree with the given alphabet, otherwise returns False'''
+        
+        # Insert root node
+        prefix = word[0:len(self.root.letters)] # prefix is equivalent to the first letter block in a word
+        if word is None or prefix != self.root.letters:
             return False
-        curr_node = self.tree[word[0]]
-        for letter in word[1:self.max_word_len]:
-            # Insert new WordNode for each letter that doesen't already exist in the tree
-            if letter not in curr_node.children:
-                self.insert_letter(letter, curr_node)
-            curr_node = curr_node.children[letter]
-        # Mark the last node of the word
+        curr_node = self.tree[prefix]
+        word_len = len(word)
+
+        # Insert remaining nodes as letter groups based on alphabet
+        skip_cnt = 0
+        for i, letter in enumerate(word[len(prefix):self.max_word_len]):
+            # Skip word letter iterations for length of a previously inserted letter group
+            if skip_cnt > 0:
+                skip_cnt -= 1
+                continue
+
+            try:
+                alpha_index = [x[0] for x in self.alphabet].index(letter)
+            except ValueError: # letters not in given alphabet
+                return False
+
+            # Insert letter (single)
+            if letter == self.alphabet[alpha_index] and letter not in curr_node.children: # letter == letter_group implies single letter
+                self.insert_node(letter, curr_node)
+                curr_node = curr_node.children[letter]
+            # Letter already exists
+            elif letter == self.alphabet[alpha_index]:
+                curr_node = curr_node.children[letter]
+            # Check for letter groups (like "Qu") starting with `letter` in alphabet
+            else:
+                alpha = self.alphabet[alpha_index]
+                # Check that letter group is shorter than and matches in the word remainder
+                if len(alpha) < word_len - i and alpha == word[i+1:i+1+len(alpha)]:
+                    if alpha not in curr_node.children:
+                        self.insert_node(alpha, curr_node)
+                        curr_node = curr_node.children[alpha]
+                    else: # node already exist
+                        curr_node = curr_node.children[alpha]
+
+                    skip_cnt = len(alpha) - 1
+                    #print(f"LONG GROUP: {alpha}; {word}")
+                else:
+                    return False
+            
+        # Mark the last node as a word
         curr_node.is_word = len(word) <= self.max_word_len
         #print(f"Added: {word[:self.max_word_len]}")
         return True
 
-    def search(self, word: str) -> WordNode:
-        '''Return True if a given word is in the tree otherwise return False'''
+    def search(self, word: str, curr_node = None) -> WordNode:
+        '''Return leaf (WordNode) if a given word is in the tree otherwise return None'''
         if len(word) == 0 or word is None:
-            return False
+            return curr_node
 
-        curr_node = self.tree[word[0]]
-        for char in word[1:]:
-            if char not in curr_node.children:
-                return None
+        if curr_node is None:
+            curr_node = self.root
+        for letters in curr_node.children:
+            if letters == word[len(curr_node.letters):len(curr_node.letters) + len(letters)]:
+                return self.search(word[len(curr_node.letters):], curr_node.children[letters])
 
-            curr_node = curr_node.children[char]
-
+        # Currently only returns single path for word
+        # TODO: return all possible paths, maybe create minature WordTree? Or just of list of paths.
         return curr_node
 
     # TODO: implement tree walk
@@ -275,21 +316,21 @@ class WordTree:
         dict_node   -- a pointer on the dictionary where nodes are read from for validation
         subtree     -- the partial tree passed to the next recursive step for generating branches
         '''
-        
-        # TODO rework active_node refs for recursion so don't have to be reset to parent at every point of return
-        # if self.active_node.is_word:
-        #     # word_path = subtree.active_node.path[::-1]
-        #     # print("WORD FOUND:", "".join([board.board[x].letter for x in word_path]), word_path)
-        #     subtree.leaf_nodes.append(self.active_node)
 
+        # TODO rework active_node refs for recursion so don't have to be reset to parent at every point of return
         if self.active_node.is_word and len(self.active_node.children) == 0:
-            #word_path = subtree.active_node.path[::-1]
-            # print("WORD FOUND:", "".join([board.board[x].letter for x in word_path]), word_path)
+            word_path = subtree.active_node.path[::-1]
+            #print("WORD FOUND:", "".join([board.board[x].letters for x in word_path]), word_path)
             self.active_node = self.active_node.parent
             subtree.active_node = subtree.active_node.parent
             return
-        elif depth > self.max_word_len:
-            # print(f"MAX DEPTH REACHED! Depth = {depth}")
+        elif self.active_node.is_word:
+            word_path = subtree.active_node.path[::-1]
+            print("WORD FOUND:", "".join([board.board[x].letters for x in word_path]), word_path)
+            #subtree.leaf_nodes.append(self.active_node)
+
+        if depth > self.max_word_len:
+            print(f"MAX DEPTH REACHED! Depth = {depth}")
             self.active_node = self.active_node.parent
             subtree.active_node = subtree.active_node.parent
             return
@@ -297,11 +338,11 @@ class WordTree:
         # Branch for each adjacent board cell
         for cell in board_cell.adjacent_cells:
             # Check dictionary and exclude nodes already in path
-            if cell.letter in self.active_node.children and cell.pos not in subtree.active_node.path:
-                new_node = WordNode(cell.letter, self.active_node.is_word, subtree.active_node, board_pos = cell.pos)
+            if cell.letters in self.active_node.children and cell.pos not in subtree.active_node.path:
+                new_node = WordNode(cell.letters, self.active_node.is_word, subtree.active_node, board_pos = cell.pos)
                 subtree.active_node.add_child_node(new_node)
-                subtree.active_node = subtree.active_node.children[cell.letter] # update subtree pointer
-                self.active_node = self.active_node.children[cell.letter] # update dictionary tree pointer
+                subtree.active_node = subtree.active_node.children[cell.letters] # update subtree pointer
+                self.active_node = self.active_node.children[cell.letters] # update dictionary tree pointer
                 self.build_boggle_tree(board, board.board[cell.pos], subtree, depth=depth+1)
 
         # print(f"DONE SEARCHING at {subtree.active_node}")
@@ -313,13 +354,15 @@ class WordTree:
 def build_full_boggle_tree(board: BoggleBoard, wordlist_path: str) -> dict[str, WordTree]:
     '''Return dictionary of WordTree(s) for every letter on a BoggleBoard'''
     # TODO: implement multiprocessing / multitthreading for each start letter
-    alphabet = "".join(sorted(set([cell.letter for cell in board.board.values()])))
+    # TODO: benchmark on laptop and chromebook
+    alphabet = sorted(set([cell.letters for cell in board.board.values()]))
+    print(f"alphabet: {alphabet}")
     board_tree = {}
     index = {}
 
     print("Reading in wordlists...")
     for letter in alphabet:
-        filename = "words_" + letter + ".txt"
+        filename = "words_" + letter[0] + ".txt"
         print(f">> {letter}: {filename}")
         wordlist = read_wordlist(path.join(path.abspath(wordlist_path), filename))
         index[letter] = wordlist
@@ -327,8 +370,8 @@ def build_full_boggle_tree(board: BoggleBoard, wordlist_path: str) -> dict[str, 
     print("Generating WordTrees...")
     for cell in board.board.values():
         print(f">> {cell}")
-        dict_tree = WordTree(alphabet, WordNode(cell.letter), index[cell.letter])
-        sub_tree = WordTree(alphabet, WordNode(cell.letter, False, board_pos=cell.pos))
+        dict_tree = WordTree(alphabet, WordNode(cell.letters), index[cell.letters])
+        sub_tree = WordTree(alphabet, WordNode(cell.letters, False, board_pos=cell.pos))
         board_tree[cell.pos] = dict_tree.build_boggle_tree(board, cell, sub_tree)
 
     return board_tree
@@ -344,6 +387,12 @@ def read_boggle_file(file):
         return [x.rstrip().split(',') for x in file.readlines()]
 
 if __name__ == "__main__":
-    b2 = read_boggle_file(sys.argv[1])
+    b2 = read_boggle_file("boards/b1.csv")
+    #b2 = read_boggle_file(sys.argv[1])
     b2_board = BoggleBoard(b2)
+    print([x.letters for x in b2_board.board.values()])
     boggle_tree = build_full_boggle_tree(b2_board, "wordlists/dwyl")
+    print("Search 'quay':", boggle_tree[(1,1)].search('quay').path)
+    print("Search 'quip':", boggle_tree[(1,1)].search('quip').path)
+    print("Search 'squall':", boggle_tree[(0,0)].search('squall').path)
+    print("Search 'quash':", boggle_tree[(1,1)].search('quash').path)
