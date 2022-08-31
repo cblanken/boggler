@@ -8,16 +8,25 @@ if __name__ == '__main__':
         print('Usage: python3 boggler.py <BOARD_FILE> <WORDLISTS_DIR> [MAX_WORD_LENGTH]')
         sys.exit(1)
 
-    b1 = read_boggle_file(Path(sys.argv[1]))
+    board = read_boggle_file(Path(sys.argv[1]))
     if len(sys.argv) == 3:
-        b1_board = BoggleBoard(b1)
-        print(b1_board)
-        boggle_tree = build_full_boggle_tree(b1_board, Path(sys.argv[2]))
+        boggle_board = BoggleBoard(board)
+        print(boggle_board)
+        boggle_tree = build_full_boggle_tree(boggle_board, Path(sys.argv[2]))
     elif len(sys.argv) == 4:
         try :
-            b1_board = BoggleBoard(b1, int(sys.argv[3]))
-            print(b1_board)
-            boggle_tree = build_full_boggle_tree(b1_board, Path(sys.argv[2]))
+            boggle_board = BoggleBoard(board, int(sys.argv[3]))
+            print(boggle_board)
+            boggle_tree = build_full_boggle_tree(boggle_board, Path(sys.argv[2]))
+
+            print("\nBOARD")
+            print(boggle_board)
+            
+            for start_pos, tree in boggle_tree.items():
+                print(f"\nStarting @ {start_pos}...")
+                for word in tree.word_paths:
+                    print(f"{word[0]: <{boggle_board.max_word_len}}: {word[1]}")
+
         except ValueError as e:
             print("The [MAX_WORD_LENGTH] argument must be an integer.")
             print("Please try again.")
