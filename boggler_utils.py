@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 from os import path
-from itertools import islice
 import sys
 
 class BoardCell:
@@ -47,16 +46,17 @@ class BoardCell:
         return f"({self.__row}, {self.__col}): {self.__letters}"
 
     def __repr__(self):
-        return f"({self.__row}, {self.__col}): {self.__letters}"
+        return f"(BoardCell({self.__row}, {self.__col}): {self.__letters}; {self.__adjacent_cells})"
 
 class BoggleBoard:
     '''Boggle board structure'''
     def __init__(self, board: list[list[str]], max_word_len: int = 14) -> BoggleBoard:
         self.__height: int = len(board)
         self.__width: int = len(board[0]) if self.__height > 0 else 0
+        self.__board_list = board
         self.__board: dict[(int, int), BoardCell] = {}
 
-        # max word length is limited by size of the board
+        # Max word length is limited by size of the board
         self.__max_word_len = min(max_word_len, self.__width * self.__height)
 
         # Generate BoardCell for each position on the board
@@ -67,9 +67,23 @@ class BoggleBoard:
         # Update adjacent cell references for each BoardCell
         for cell in self.__board.values():
             adjacent_indexes = self.__get_adjacent_indexes(cell.row, cell.col)
-            #print(cell)
-            #print(adjacent_indexes)
             cell.adjacent_cells = [self.__board[(x[0], x[1])] for x in adjacent_indexes]
+
+    def __str__(self):
+        flattened_board_list = [y for x in self.__board_list for y in x]
+        max_len = len(max(flattened_board_list, key=len))
+        max_len = max_len + 1 if max_len % 2 == 0 else max_len + 2 # keep header_len odd
+        header_len = self.__width * (max_len + 1) - 1
+        head = "-" * header_len
+        header = f"+{head}+\n"
+        body = ""
+        for row in self.__board_list:
+            body += "|"
+            for col in row:
+                body += f"{col.upper(): ^{max_len}}|"
+            body += "\n"
+            body += header
+        return f"{header}{body}"
 
     @property
     def height(self) -> int:
@@ -174,7 +188,7 @@ class WordNode:
         return f"WordNode: {self.letters}, {self.is_word}"
 
     def __repr__(self):
-        return self.__str__()
+        return f"WordNode: {self.letters}, {self.is_word}, {self.children}"
 
 class WordTree:
     '''A tree populated by WordNode(s) to complete words from a given root letter and wordlist'''
@@ -323,11 +337,12 @@ class WordTree:
             #print("WORD FOUND:", "".join([board.board[x].letters for x in word_path]), word_path)
             self.active_node = self.active_node.parent
             subtree.active_node = subtree.active_node.parent
+            #subtree.leaf_nodes_by_word.append(self.active_node)
             return
         elif self.active_node.is_word:
             word_path = subtree.active_node.path[::-1]
-            print("WORD FOUND:", "".join([board.board[x].letters for x in word_path]), word_path)
-            #subtree.leaf_nodes.append(self.active_node)
+            #print("WORD FOUND:", "".join([board.board[x].letters for x in word_path]), word_path)
+            #subtree.leaf_nodes_by_word.append(self.active_node)
 
         if depth > self.max_word_len:
             print(f"MAX DEPTH REACHED! Depth = {depth}")
@@ -387,12 +402,12 @@ def read_boggle_file(file):
         return [x.rstrip().split(',') for x in file.readlines()]
 
 if __name__ == "__main__":
-    b2 = read_boggle_file("boards/b1.csv")
-    #b2 = read_boggle_file(sys.argv[1])
+    #b2 = read_boggle_file("boards/b1.csv")
+    b2 = read_boggle_file(sys.argv[1])
     b2_board = BoggleBoard(b2)
-    print([x.letters for x in b2_board.board.values()])
-    boggle_tree = build_full_boggle_tree(b2_board, "wordlists/dwyl")
-    print("Search 'quay':", boggle_tree[(1,1)].search('quay').path)
-    print("Search 'quip':", boggle_tree[(1,1)].search('quip').path)
-    print("Search 'squall':", boggle_tree[(0,0)].search('squall').path)
-    print("Search 'quash':", boggle_tree[(1,1)].search('quash').path)
+    print(b2_board)
+    #boggle_tree = build_full_boggle_tree(b2_board, "wordlists/dwyl")
+    #print("Search 'quay':", boggle_tree[(1,1)].search('quay').path)
+    #print("Search 'quip':", boggle_tree[(1,1)].search('quip').path)
+    #print("Search 'squall':", boggle_tree[(0,0)].search('squall').path)
+    #print("Search 'quash':", boggle_tree[(1,1)].search('quash').path)
