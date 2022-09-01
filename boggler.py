@@ -16,12 +16,11 @@ if __name__ == '__main__':
     elif len(sys.argv) == 4:
         try :
             boggle_board = BoggleBoard(board, int(sys.argv[3]))
-            print(boggle_board)
             boggle_tree = build_full_boggle_tree(boggle_board, Path(sys.argv[2]))
 
             print("\nBOARD")
             print(boggle_board)
-            
+
             for start_pos, tree in boggle_tree.items():
                 print(f"\nStarting @ {start_pos}...")
                 for word in tree.word_paths:
