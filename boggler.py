@@ -21,7 +21,7 @@ if __name__ == '__main__':
 
             print("\nBOARD")
             print(boggle_board)
-            
+
             for start_pos, tree in boggle_tree.items():
                 print(f"\nStarting @ {start_pos}...")
                 for word in tree.word_paths:

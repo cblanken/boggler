@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 from os import path
+from multiprocessing import Pool
 import sys
 
 class BoardCell:
@@ -326,8 +327,6 @@ class WordTree:
         # TODO: return all possible paths, maybe create minature WordTree? Or just of list of paths.
         return curr_node
 
-    # TODO: implement tree walk
-
     def build_boggle_tree(self, board: BoggleBoard, board_cell: BoardCell, subtree: WordTree, depth: int = 1) -> WordTree:
         '''Return subtree of board given a particular root (first letter).
 
@@ -368,16 +367,20 @@ class WordTree:
                 self.build_boggle_tree(board, board.board[cell.pos], subtree, depth=depth+1)
                 #print(f"depth: {depth}")
 
-        # print(f"DONE SEARCHING at {subtree.active_node}")
-
         self.active_node = self.active_node.parent
         subtree.active_node = subtree.active_node.parent
         return subtree
 
+def build_boggle_tree(args):
+    '''Build boggle tree from arguments for process Pool'''
+    (alphabet, board, cell, wordlist) = args
+    root_node = WordNode(cell.letters)
+    dict_tree = WordTree(alphabet, root_node, wordlist)
+    sub_tree = WordTree(alphabet, WordNode(cell.letters, False, board_pos=cell.pos))
+    return dict_tree.build_boggle_tree(board, cell, sub_tree)
+
 def build_full_boggle_tree(board: BoggleBoard, wordlist_path: str) -> dict[str, WordTree]:
     '''Return dictionary of WordTree(s) for every letter on a BoggleBoard'''
-    # TODO: implement multiprocessing / multitthreading for each start letter
-    # TODO: benchmark on laptop and chromebook
     alphabet = sorted(set([cell.letters for cell in board.board.values()]))
     board_tree = {}
     index = {}
@@ -390,11 +393,10 @@ def build_full_boggle_tree(board: BoggleBoard, wordlist_path: str) -> dict[str, 
         index[letter] = wordlist
 
     print("Generating WordTrees...")
-    for cell in board.board.values():
-        print(f">> {cell}")
-        dict_tree = WordTree(alphabet, WordNode(cell.letters), index[cell.letters])
-        sub_tree = WordTree(alphabet, WordNode(cell.letters, False, board_pos=cell.pos))
-        board_tree[cell.pos] = dict_tree.build_boggle_tree(board, cell, sub_tree)
+    params = [ [alphabet, board, cell, index[cell.letters] ]  for cell in board.board.values()]
+    with Pool(processes=len(board.board)) as pool:
+        for i, res in enumerate(pool.map(build_boggle_tree, params)):
+            board_tree[params[i][2].pos] = res
 
     return board_tree
 
