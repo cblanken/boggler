@@ -396,6 +396,7 @@ def build_full_boggle_tree(board: BoggleBoard, wordlist_path: str) -> dict[str, 
     params = [ [alphabet, board, cell, index[cell.letters] ]  for cell in board.board.values()]
     with Pool(processes=len(board.board)) as pool:
         for i, res in enumerate(pool.map(build_boggle_tree, params)):
+            print(f">> {params[i][2]}")
             board_tree[params[i][2].pos] = res
 
     return board_tree
