@@ -30,5 +30,6 @@ else
     grep -P "^x" $1 > "$2/words_x.txt"
     grep -P "^y" $1 > "$2/words_y.txt"
     grep -P "^z" $1 > "$2/words_z.txt"
+    grep -P "^_" $1 > "$2/words__.txt"
     exit 0
 fi
