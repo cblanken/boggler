@@ -1,9 +1,7 @@
 '''Boggler Utils'''
-
 from __future__ import annotations
 from os import path
 from multiprocessing import Pool
-import sys
 
 class BoardCell:
     '''Boggle Board cell'''
@@ -309,7 +307,6 @@ class WordTree:
 
         # Mark the last node as a word
         curr_node.is_word = len(word) <= self.max_word_len
-        #print(f"Added: {word[:self.max_word_len]}")
         return True
 
     def search(self, word: str, curr_node = None) -> WordNode:
@@ -365,7 +362,6 @@ class WordTree:
                 subtree.active_node = subtree.active_node.children[cell.letters] # update subtree pointer
                 self.active_node = self.active_node.children[cell.letters] # update dictionary tree pointer
                 self.build_boggle_tree(board, board.board[cell.pos], subtree, depth=depth+1)
-                #print(f"depth: {depth}")
 
         self.active_node = self.active_node.parent
         subtree.active_node = subtree.active_node.parent
@@ -414,15 +410,3 @@ def read_boggle_file(file):
     '''Return list of rows from Boggle board csv file'''
     with open(file, 'r', encoding='utf-8') as file:
         return [x.rstrip().split(',') for x in file.readlines()]
-
-if __name__ == "__main__":
-    #b2 = read_boggle_file(sys.argv[1])
-    b2 = read_boggle_file("boards/b1.csv")
-    b2_board = BoggleBoard(b2)
-    boggle_tree = build_full_boggle_tree(b2_board, "wordlists/dwyl")
-    print("\nBOARD")
-    print(b2_board)
-
-    w1 = boggle_tree[(0,0)].word_paths
-    for w in w1:
-        print(f"{w[0]: <{b2_board.max_word_len}}: {w[1]}")
