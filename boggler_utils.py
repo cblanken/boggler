@@ -386,11 +386,15 @@ def build_full_boggle_tree(board: BoggleBoard, wordlist_path: str) -> dict[str, 
     index = {}
 
     print("Reading in wordlists...")
-    for letter in alphabet:
-        filename = "words_" + letter[0] + ".txt"
-        print(f">> {letter}: {filename}")
+    for letters in alphabet:
+        if letters[0] in index:
+            index[letters] = index[letters[0]]
+            continue
+
+        filename = "words_" + letters[0] + ".txt"
+        print(f">> {letters}: {filename}")
         wordlist = read_wordlist(path.join(path.abspath(wordlist_path), filename))
-        index[letter] = wordlist
+        index[letters] = wordlist
 
     print("Generating WordTrees...")
     params = [ [alphabet, board, cell, index[cell.letters] ]  for cell in board.board.values()]
