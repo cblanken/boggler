@@ -2,8 +2,12 @@
 A solver for the popular word game Boggle.
 
 # Install
-```bash
-$ git clone https://github.com/cblanken/boggler.git
+```console
+pip install boggler
+```
+OR
+```console
+git clone https://github.com/cblanken/boggler.git
 ```
 
 To use the script to solve a particular Boggle board configuration, you'll need to do a few things
@@ -11,11 +15,11 @@ To use the script to solve a particular Boggle board configuration, you'll need 
     
     Here is an example `board.csv`. Note the orientation of the board does not matter.
     ```console
-    $ cat boards/b1.csv
-    s,a,i,p
-    l,qu,a,y
-    u,l,l,s
-    o,w,h,a
+    $ cat board.csv
+    y,e,o,s
+    r,e,o,v
+    d,f,e,y
+    n,m,e,qu
     ```
 2. Find a dictionary wordlist file or create your own
 
