@@ -398,3 +398,6 @@ quey           : [(3, 3), (3, 2), (2, 3)]
 quem           : [(3, 3), (3, 2), (3, 1)]
 queme          : [(3, 3), (3, 2), (3, 1), (2, 2)]
 ```
+
+# License
+The included [wordlists](src/boggler/wordlists) are covered by their respective licenses. All other files MIT © Cameron Blankenbuehler
