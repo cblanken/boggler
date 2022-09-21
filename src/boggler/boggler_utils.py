@@ -197,9 +197,9 @@ class WordNode:
 
 class WordTree:
     '''A tree populated by WordNode(s) to complete words from a given root letter and wordlist'''
-    def __init__(self, alphabet: str, root: WordNode, words: list[str] = None,
+    def __init__(self, alphabet: list, root: WordNode, words: list[str] = None,
         max_word_len = 16) -> WordTree:
-        self.__alphabet: str = alphabet
+        self.__alphabet: list = alphabet
         self.__wordlist: list[str] = words
         self.__root: WordNode = root
         self.__max_word_len: int = max_word_len
@@ -216,7 +216,7 @@ class WordTree:
                 self.__insert_word(word)
 
     @property
-    def alphabet(self) -> str:
+    def alphabet(self) -> list:
         '''Getter for alphabet property'''
         return self.__alphabet
 
@@ -278,7 +278,7 @@ class WordTree:
                 continue
 
             try:
-                alpha_index = [x[0] for x in self.alphabet].index(letter)
+                alpha_index = self.alphabet.index(letter)
             except ValueError: # letters not in given alphabet
                 return False
 
@@ -383,17 +383,25 @@ def build_full_boggle_tree(board: BoggleBoard, wordlist_path: str) -> dict[str, 
 
     print("Reading in wordlists...")
     for letters in alphabet:
-        if letters[0] in index:
+        if letters == "":
+            # Skip wordlist read for blocks with empty string
+            index[""] = {}
+            continue
+        elif letters[0] in index:
             index[letters] = index[letters[0]]
             continue
 
         filename = "words_" + letters[0] + ".txt"
-        print(f">> {letters}: {filename}")
-        wordlist = read_wordlist(path.join(path.abspath(wordlist_path), filename))
-        index[letters] = wordlist
+        try:
+            wordlist = read_wordlist(path.join(path.abspath(wordlist_path), filename))
+            index[letters] = wordlist
+            print(f">> {letters}: {filename}")
+        except FileNotFoundError:
+            print(f">> {letters}: -- Skipping -- no wordlist found for {letters}")
+            index[letters] = {}
 
     print("Generating WordTrees...")
-    params = [ [alphabet, board, cell, index[cell.letters] ]  for cell in board.board.values()]
+    params = [ [alphabet, board, cell, index[cell.letters] ] for cell in board.board.values()]
     with Pool(processes=len(board.board)) as pool:
         for i, res in enumerate(pool.map(build_boggle_tree, params)):
             print(f">> {params[i][2]}")
