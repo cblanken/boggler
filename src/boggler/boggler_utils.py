@@ -324,7 +324,7 @@ class WordTree:
         # TODO: return all possible paths, maybe create minature WordTree? Or just of list of paths.
         return curr_node
 
-    def build_boggle_tree(self, board: BoggleBoard, board_cell: BoardCell, subtree: WordTree, depth: int = 1) -> WordTree:
+    def build_boggle_tree(self, board: BoggleBoard, board_cell: BoardCell, subtree: WordTree, word_len: int = 0) -> WordTree:
         '''Return subtree of board given a particular root (first letter).
 
         Keyword arguments:
@@ -333,6 +333,12 @@ class WordTree:
         dict_node   -- a pointer on the dictionary where nodes are read from for validation
         subtree     -- the partial tree passed to the next recursive step for generating branches
         '''
+
+        if word_len > self.max_word_len or word_len >= board.max_word_len:
+            #print(f"MAX DEPTH REACHED! Depth = {depth}")
+            subtree.active_node = subtree.active_node.parent
+            self.active_node = self.active_node.parent
+            return
 
         # TODO rework active_node refs for recursion so don't have to be reset to parent at every point of return
         if self.active_node.is_word and len(self.active_node.children) == 0:
@@ -347,12 +353,6 @@ class WordTree:
             subtree.word_paths.append((subtree.active_node.get_word(board), word_path))
             #print("2: WORD FOUND:", "".join([board.board[x].letters for x in word_path]), word_path)
 
-        if depth >= self.max_word_len or depth >= board.max_word_len:
-            #print(f"MAX DEPTH REACHED! Depth = {depth}")
-            subtree.active_node = subtree.active_node.parent
-            self.active_node = self.active_node.parent
-            return
-
         # Branch for each adjacent board cell
         for cell in board_cell.adjacent_cells:
             # Check dictionary and exclude nodes already in path
@@ -361,7 +361,7 @@ class WordTree:
                 subtree.active_node.add_child_node(new_node)
                 subtree.active_node = subtree.active_node.children[cell.letters] # update subtree pointer
                 self.active_node = self.active_node.children[cell.letters] # update dictionary tree pointer
-                self.build_boggle_tree(board, board.board[cell.pos], subtree, depth=depth+1)
+                self.build_boggle_tree(board, board.board[cell.pos], subtree, word_len=word_len+len(board_cell.letters))
 
         self.active_node = self.active_node.parent
         subtree.active_node = subtree.active_node.parent
