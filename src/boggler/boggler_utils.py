@@ -2,6 +2,8 @@
 from __future__ import annotations
 from os import path
 from multiprocessing import Pool
+import functools
+import operator
 
 class BoardCell:
     '''Boggle Board cell'''
@@ -418,3 +420,10 @@ def read_boggle_file(file):
     '''Return list of rows from Boggle board csv file'''
     with open(file, 'r', encoding='utf-8') as file:
         return [x.rstrip().split(',') for x in file.readlines()]
+
+def find_paths_by_word(board_letters, dictionary_path, max_len):
+    '''Return list of paths by word'''
+    boggle_board = BoggleBoard(board_letters, max_len)
+    boggle_tree = build_full_boggle_tree(boggle_board, dictionary_path)
+    paths_by_word = functools.reduce(operator.iconcat, [x.word_paths for x in boggle_tree.values()], [])
+    return paths_by_word
