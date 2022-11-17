@@ -1,7 +1,7 @@
 """Boggler Demo"""
 import sys
 from pathlib import Path
-from boggler_utils import BoggleBoard, build_full_boggle_tree, read_boggle_file, find_paths_by_word
+from boggler_utils import BoggleBoard, build_full_boggle_tree, read_boggle_file
 
 if __name__ == '__main__':
     if len(sys.argv) < 3 or len(sys.argv) > 4:
@@ -22,10 +22,6 @@ if __name__ == '__main__':
 
         print("\nBOARD")
         print(boggle_board)
-
-        # found_words = find_paths_by_word(board, Path(sys.argv[2]), 16)
-        # for word in found_words:
-        #     print(word)
 
         for start_pos, tree in boggle_tree.items():
             print(f"\nStarting @ {start_pos}...")
