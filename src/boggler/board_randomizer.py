@@ -1,7 +1,7 @@
 '''Module to generate random Boggle boards for testing'''
 from sys import argv, stderr
 from random import randint, shuffle
-from math import sqrt
+from math import sqrt, floor
 from os import path
 
 def read_dice_file(dice_path: str):
@@ -22,7 +22,7 @@ def get_random_board(dice: list[str]):
     rolls = roll_dice(dice)
 
     # Format dice rolls for boards file
-    board_size = int(sqrt(len(rolls)))
+    board_size = int(floor(sqrt(len(rolls))))
     board = []
     for i in range(0, len(dice), board_size):
         board.append(rolls[i:i+board_size])
@@ -40,8 +40,8 @@ if __name__ == '__main__':
         try:
             dice = read_dice_file(path.abspath(argv[1]))
             board = get_random_board_csv(dice)
-            for row in board:
-                print(row)
+            for r in range(0, int(floor(sqrt(len(dice))))):
+                print(board[r])
         except Exception as e:
             print("Argument must be a valid file path!", file=stderr)
 
