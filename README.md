@@ -399,5 +399,16 @@ quem           : [(3, 3), (3, 2), (3, 1)]
 queme          : [(3, 3), (3, 2), (3, 1), (2, 2)]
 ```
 
+# Build
+Make sure the hatchling build system is installed
+```bash
+pip install hatchling
+```
+
+Navigate to the project folder then run the following.
+```bash
+python -m build .
+```
+
 # License
 The included [wordlists](src/boggler/wordlists) are covered by their respective licenses. All other files MIT © Cameron Blankenbuehler
