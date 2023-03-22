@@ -2,6 +2,7 @@
 from __future__ import annotations
 from os import path
 from multiprocessing import Pool
+from logging import info, debug, warn, error
 import functools
 import operator
 
@@ -297,13 +298,13 @@ class WordTree:
                 # Check that letter group is shorter than and matches in the word remainder
                 if len(alpha) < word_len - i and alpha == word[i+1:i+1+len(alpha)]:
                     if alpha not in curr_node.children:
-                        self.insert_node(alpha, curr_node)
+                        self.insert_node(alpha, curr_node )
                         curr_node = curr_node.children[alpha]
                     else: # node already exist
                         curr_node = curr_node.children[alpha]
 
                     skip_cnt = len(alpha) - 1
-                    #print(f"LONG GROUP: {alpha}; {word}")
+                    debug(f"LONG GROUP: {alpha}; {word}")
                 else:
                     return False
 
@@ -337,7 +338,7 @@ class WordTree:
         '''
 
         if word_len > self.max_word_len or word_len >= board.max_word_len:
-            #print(f"MAX DEPTH REACHED! Depth = {depth}")
+            debug(f"MAX WORD LENGTH REACHED! len = {word_len}")
             subtree.active_node = subtree.active_node.parent
             self.active_node = self.active_node.parent
             return
@@ -346,14 +347,14 @@ class WordTree:
         if self.active_node.is_word and len(self.active_node.children) == 0:
             word_path = subtree.active_node.path[::-1]
             subtree.word_paths.append((subtree.active_node.get_word(board), word_path))
-            #print("1: WORD FOUND:", "".join([board.board[x].letters for x in word_path]), word_path)
+            debug("1: WORD FOUND:", "".join([board.board[x].letters for x in word_path]), word_path)
             self.active_node = self.active_node.parent
             subtree.active_node = subtree.active_node.parent
             return
         elif self.active_node.is_word:
             word_path = subtree.active_node.path[::-1]
             subtree.word_paths.append((subtree.active_node.get_word(board), word_path))
-            #print("2: WORD FOUND:", "".join([board.board[x].letters for x in word_path]), word_path)
+            debug("2: WORD FOUND:", "".join([board.board[x].letters for x in word_path]), word_path)
 
         # Branch for each adjacent board cell
         for cell in board_cell.adjacent_cells:
@@ -383,7 +384,7 @@ def build_full_boggle_tree(board: BoggleBoard, wordlist_path: str) -> dict[str, 
     board_tree = {}
     index = {}
 
-    print("Reading in wordlists...")
+    info("Reading in wordlists...")
     for letters in alphabet:
         if letters == "":
             # Skip wordlist read for blocks with empty string
@@ -397,16 +398,16 @@ def build_full_boggle_tree(board: BoggleBoard, wordlist_path: str) -> dict[str, 
         try:
             wordlist = read_wordlist(path.join(path.abspath(wordlist_path), filename))
             index[letters] = wordlist
-            print(f">> {letters}: {filename}")
+            info(f">> {letters}: {filename}")
         except FileNotFoundError:
-            print(f">> {letters}: -- Skipping -- no wordlist found for {letters}")
+            info(f">> {letters}: -- Skipping -- no wordlist found for {letters}")
             index[letters] = {}
 
-    print("Generating WordTrees...")
+    info("Generating WordTrees...")
     params = [ [alphabet, board, cell, index[cell.letters] ] for cell in board.board.values()]
     with Pool(processes=len(board.board)) as pool:
         for i, res in enumerate(pool.map(build_boggle_tree, params)):
-            print(f">> {params[i][2]}")
+            info(f">> {params[i][2]}")
             board_tree[params[i][2].pos] = res
 
     return board_tree
@@ -414,7 +415,7 @@ def build_full_boggle_tree(board: BoggleBoard, wordlist_path: str) -> dict[str, 
 def read_wordlist(file):
     '''Return dictionary of words with associated word count (1 by default)'''
     with open(file, 'r', encoding='utf-8') as file:
-        return {k:1 for k in file.read().split()}
+        return file.read().split()
 
 def read_boggle_file(file):
     '''Return list of rows from Boggle board csv file'''
