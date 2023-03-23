@@ -2,7 +2,7 @@
 from __future__ import annotations
 from os import path
 from multiprocessing import Pool
-from logging import info, debug, warn, error
+import logging as log
 import functools
 import operator
 
@@ -258,6 +258,7 @@ class WordTree:
     def insert_node(self, letters: str, parent: WordNode, is_word: bool = False,
         children: dict[str, WordNode] = None, board_pos = None):
         '''Create WordNode for `letters` and into WordTree under `parent`'''
+        log.debug("inserting node: ", letters)
         node = WordNode(letters, is_word, parent, children, board_pos)
         parent.add_child_node(node)
 
@@ -272,41 +273,25 @@ class WordTree:
         curr_node = self.tree[prefix]
         word_len = len(word)
 
-        # Insert remaining nodes as letter groups based on alphabet
-        skip_cnt = 0
-        for i, letter in enumerate(word[len(prefix):self.max_word_len]):
-            # Skip word letter iterations for length of a previously inserted letter group
-            if skip_cnt > 0:
-                skip_cnt -= 1
-                continue
-
-            try:
-                alpha_index = self.alphabet.index(letter)
-            except ValueError: # letters not in given alphabet
-                return False
-
-            # Insert letter (single)
-            if letter == self.alphabet[alpha_index] and letter not in curr_node.children:
-                self.insert_node(letter, curr_node)
-                curr_node = curr_node.children[letter]
-            # Letter already exists
-            elif letter == self.alphabet[alpha_index]:
-                curr_node = curr_node.children[letter]
-            # Check for letter groups (like "Qu") starting with `letter` in alphabet
-            else:
-                alpha = self.alphabet[alpha_index]
-                # Check that letter group is shorter than and matches in the word remainder
-                if len(alpha) < word_len - i and alpha == word[i+1:i+1+len(alpha)]:
-                    if alpha not in curr_node.children:
-                        self.insert_node(alpha, curr_node )
-                        curr_node = curr_node.children[alpha]
-                    else: # node already exist
-                        curr_node = curr_node.children[alpha]
-
-                    skip_cnt = len(alpha) - 1
-                    debug(f"LONG GROUP: {alpha}; {word}")
-                else:
+        i = len(prefix)
+        i_max = min(self.max_word_len, len(word))
+        while i < i_max:
+            letters = word[i]
+            log.debug("1 letter seq: ", word, letters, letters in curr_node.children)
+            if letters not in self.alphabet:
+                # Check two letter sequences like ("Qu", "Th", etc.) at current index
+                letters = word[i:i+2]
+                log.debug("2 letter seq: ", word, letters, letters in curr_node.children)
+                if letters not in self.alphabet:
                     return False
+            # Insert node
+            if letters not in curr_node.children:
+                self.insert_node(letters, curr_node)
+                log.debug("3 letter seq: ", word, letters)
+
+            curr_node = curr_node.children[letters]
+
+            i += len(letters)
 
         # Mark the last node as a word
         curr_node.is_word = len(word) <= self.max_word_len
@@ -317,6 +302,7 @@ class WordTree:
         if len(word) == 0 or word is None:
             return curr_node
 
+        log.debug("Searching...", word, curr_node)
         if curr_node is None:
             curr_node = self.root
         for letters in curr_node.children:
@@ -338,7 +324,7 @@ class WordTree:
         '''
 
         if word_len > self.max_word_len or word_len >= board.max_word_len:
-            debug(f"MAX WORD LENGTH REACHED! len = {word_len}")
+            log.debug(f"MAX WORD LENGTH REACHED! len = {word_len}")
             subtree.active_node = subtree.active_node.parent
             self.active_node = self.active_node.parent
             return
@@ -347,14 +333,14 @@ class WordTree:
         if self.active_node.is_word and len(self.active_node.children) == 0:
             word_path = subtree.active_node.path[::-1]
             subtree.word_paths.append((subtree.active_node.get_word(board), word_path))
-            debug("1: WORD FOUND:", "".join([board.board[x].letters for x in word_path]), word_path)
+            log.debug("1: WORD FOUND:", "".join([board.board[x].letters for x in word_path]), word_path)
             self.active_node = self.active_node.parent
             subtree.active_node = subtree.active_node.parent
             return
         elif self.active_node.is_word:
             word_path = subtree.active_node.path[::-1]
             subtree.word_paths.append((subtree.active_node.get_word(board), word_path))
-            debug("2: WORD FOUND:", "".join([board.board[x].letters for x in word_path]), word_path)
+            log.debug("2: WORD FOUND:", "".join([board.board[x].letters for x in word_path]), word_path)
 
         # Branch for each adjacent board cell
         for cell in board_cell.adjacent_cells:
@@ -384,7 +370,7 @@ def build_full_boggle_tree(board: BoggleBoard, wordlist_path: str) -> dict[str, 
     board_tree = {}
     index = {}
 
-    info("Reading in wordlists...")
+    log.info("Reading in wordlists...")
     for letters in alphabet:
         if letters == "":
             # Skip wordlist read for blocks with empty string
@@ -398,16 +384,16 @@ def build_full_boggle_tree(board: BoggleBoard, wordlist_path: str) -> dict[str, 
         try:
             wordlist = read_wordlist(path.join(path.abspath(wordlist_path), filename))
             index[letters] = wordlist
-            info(f">> {letters}: {filename}")
+            log.info(f">> {letters}: {filename}")
         except FileNotFoundError:
-            info(f">> {letters}: -- Skipping -- no wordlist found for {letters}")
+            log.info(f">> {letters}: -- Skipping -- no wordlist found for {letters}")
             index[letters] = {}
 
-    info("Generating WordTrees...")
+    log.info("Generating WordTrees...")
     params = [ [alphabet, board, cell, index[cell.letters] ] for cell in board.board.values()]
     with Pool(processes=len(board.board)) as pool:
         for i, res in enumerate(pool.map(build_boggle_tree, params)):
-            info(f">> {params[i][2]}")
+            log.info(f">> {params[i][2]}")
             board_tree[params[i][2].pos] = res
 
     return board_tree
