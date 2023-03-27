@@ -12,13 +12,14 @@ int main(int argc, char **argv) {
         "i", "s", "h", "a",
         "s", "e", "l", "b"
     };
-    char **cell_letters = malloc(BOARD_SIZE * sizeof(char*));
+    char **cell_letters = malloc(BOARD_SIZE * sizeof(struct BoardCell*));
+
+    struct BoardCell **cells = malloc(sizeof(struct BoardCell*) * BOARD_SIZE * BOARD_SIZE);
     for (uint8_t i = 0; i < BOARD_SIZE * BOARD_SIZE; i++) {
-        cell_letters[i] = malloc(strlen(letters[i]) * sizeof(char));
-        cell_letters[i] = letters[i];
+        cells[i] = create_board_cell(letters[i], (int)(i / BOARD_SIZE), i % BOARD_SIZE);
     }
 
-    Board board = { .height = 4, .width = 4, .cells = cell_letters };
-    print_board(board);
+    Board board = { .height = 4, .width = 4, .cells = cells };
+    print_board(&board);
     free(cell_letters);
 }
