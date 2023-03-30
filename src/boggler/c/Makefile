@@ -1,5 +1,5 @@
 CC = gcc
-CFLAGS = -Wall -Werror -std=c17
+CFLAGS = -Wall -Werror -std=gnu17 -g3
 OBJS = boggler.o
 
 all: $(OBJS)
