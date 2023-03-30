@@ -25,13 +25,17 @@ int main(int argc, char **argv) {
     print_board(&board);
     free(cell_letters);
 
-    struct WordNode *root = malloc(sizeof(struct WordNode));
+    struct WordNode *root = malloc(sizeof(struct WordNode) + sizeof(struct WordNode*));
     init_wordnode(root, false, cells[0], NULL, NULL, 0);
-    print_wordnode(root);
-    add_child_node(root, cells[5], false);
-    //add_child_node(root->children[0], cells[6], false);
+    add_child_node(&root, cells[5], false);
+    add_child_node(&root, cells[4], false);
     print_wordnode(root);
     print_wordnode_path(root->children[0]);
 
+    free_wordnode_children(root);
     free(root);
+    for (uint8_t i = 0; i < BOARD_SIZE * BOARD_SIZE; i++) {
+        free(cells[i]);
+    }
+    free(cells);
 }

@@ -57,7 +57,7 @@ struct BoardCell *create_board_cell(char *letters, uint8_t row, uint8_t col) {
     /* BoardCells are created with 8 adjacent cells since that is the minimum required
      * for centrally placed (not on sides or corners) cells on a board.
      */
-    struct BoardCell *cell = malloc(sizeof(struct BoardCell*));
+    struct BoardCell *cell = malloc(sizeof(struct BoardCell));
     cell->letters = letters;
     cell->row = row;
     cell->col = col;
@@ -69,9 +69,15 @@ struct BoardCell *get_cell_at(Board *board, Vec2 pos) {
     return board->cells[pos.row * pos.col + pos.col];
 }
 
+int print_boardcell(struct BoardCell *c) {
+    printf("%3s | (%d,%d)\n", c->letters, c->row, c->col);
+    return 0;
+}
+
 int print_board(Board *board) {
-    char *row_delim = malloc((board->width * 4 + 1) * sizeof(char));
-    row_delim[0] = '+';
+    uint8_t row_len = (board->width * 4 + 1) * sizeof(char) + 1;
+    char *row_delim = malloc(row_len);
+    snprintf(row_delim, 2, "%c", '+');
     for (uint8_t i = 0; i < board->width; i++) {
         strcat(row_delim, "----");
     }
@@ -91,6 +97,16 @@ int print_board(Board *board) {
     return 0;
 }
 
+void free_board(Board *b) {
+    if (b != NULL) {
+        for (uint8_t i = 0; i < b->width * b->height; i++) {
+            free(b->cells[i]);
+            b->cells[i] = NULL;
+        }
+        free(b->cells);
+        free(b);
+    }
+}
 //Vec2[] get_adjacent_indexes(uint8_t board_size, Vec2 pos) {
 //    // Calculate total possible number of adjacent cells 
 //    uint16_t = total_adj_cell_cnt = ((board-size-2) * (board-size-2) * 8) + ((board-size-2) * 4 * 5) + (4 * 3);
