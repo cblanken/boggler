@@ -5,10 +5,6 @@ A solver for the popular word game Boggle.
 ```console
 pip install boggler
 ```
-OR
-```console
-git clone https://github.com/cblanken/boggler.git
-```
 
 To use the script to solve a particular Boggle board configuration, you'll need to do a few things
 1. Create `.csv` of the board state like so:
