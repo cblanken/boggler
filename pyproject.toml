@@ -21,7 +21,7 @@ classifiers = [
 [tool.poetry]
 name = "boggler"
 version = "2.0.1"
-description = "Utilities for solving the Boggle wod game."
+description = "Utilities for solving the Boggle word game."
 authors = ["Cameron Blankenbuehler <cameron.blankenbuehler@protonmail.com>"]
 readme = "README.md"
 
@@ -31,6 +31,9 @@ python = "^3.11"
 [tool.poetry.scripts]
 boggler = "boggler.__main__:main"
 
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^7.3.1"
 
 [build-system]
 requires = ["poetry-core"]
