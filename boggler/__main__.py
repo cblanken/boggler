@@ -1,9 +1,9 @@
 """Boggler Demo"""
 import sys
 from pathlib import Path
-from boggler_utils import BoggleBoard, build_full_boggle_tree, read_boggle_file
+from .boggler_utils import BoggleBoard, build_full_boggle_tree, read_boggle_file
 
-if __name__ == '__main__':
+def main():
     if len(sys.argv) < 3 or len(sys.argv) > 4:
         print('Usage: python3 boggler.py <BOARD_FILE> <WORDLISTS_DIR> [MAX_WORD_LENGTH]')
         sys.exit(1)
@@ -32,3 +32,6 @@ if __name__ == '__main__':
         print("The [MAX_WORD_LENGTH] argument must be an integer.")
         print("Please try again.")
         sys.exit(1)
+
+if __name__ == '__main__':
+    main()
