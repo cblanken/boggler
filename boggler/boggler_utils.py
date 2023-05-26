@@ -1,5 +1,6 @@
 '''Boggler Utils'''
 from __future__ import annotations
+#from pathlib import Path
 from os import path
 from multiprocessing import Pool
 import logging as log
@@ -12,7 +13,7 @@ class BoardCell:
         adjacent_cells: list[BoardCell] = None) -> BoardCell:
         self.__row: int = row
         self.__col: int = col
-        self.__pos: (int, int) = (self.__row, self.__col)
+        self.__pos: tuple(int, int) = (self.__row, self.__col)
         self.__letters: str = letters
         self.__adjacent_cells: list[BoardCell] = adjacent_cells
 
@@ -27,7 +28,7 @@ class BoardCell:
         return self.__col
 
     @property
-    def pos(self) -> (int, int):
+    def pos(self) -> tuple[int, int]:
         '''Getter for pos property'''
         return self.__pos
 
@@ -168,7 +169,7 @@ class WordNode:
         return self.__parent
 
     @property
-    def board_pos(self) -> (int, int):
+    def board_pos(self) -> tuple[int, int]:
         '''Getter for board_pos property'''
         return self.__board_pos
 
@@ -253,7 +254,10 @@ class WordTree:
         self.__word_paths = value
 
     def __str__(self):
-        return ", ".join(self.wordlist)
+        return ", ".join([str(x) for x in self.word_paths])
+
+    def __repr__(self):
+        return self.__str__()
 
     def insert_node(self, letters: str, parent: WordNode, is_word: bool = False,
         children: dict[str, WordNode] = None, board_pos = None):
@@ -407,6 +411,15 @@ def read_boggle_file(file):
     '''Return list of rows from Boggle board csv file'''
     with open(file, 'r', encoding='utf-8') as file:
         return [x.rstrip().split(',') for x in file.readlines()]
+
+def write_wordlist(filename: Path, filetype: str = "txt", sort: bool = False):
+    match filetype:
+        case "txt":
+            pass
+        case "json":
+            pass
+        case _:
+            pass
 
 def find_paths_by_word(board_letters, dictionary_path, max_len):
     '''Return list of paths by word'''

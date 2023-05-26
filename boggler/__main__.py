@@ -44,47 +44,41 @@ def main():
         print("Invalid MAX_WORD_LENGTH. Please try again with a valid integer.")
         sys.exit()
 
-    try:
-        boggle_tree = build_full_boggle_tree(boggle_board, args.wordlists)
+    boggle_tree = build_full_boggle_tree(boggle_board, args.wordlists)
 
-        if args.format:
-            match args.format.lower():
-                case "txt":
-                    word_paths = [start_block.word_paths for start_block in boggle_tree.values()]
-                    data = list(chain(*word_paths))
-                    if args.include_path:
-                        data = [f"{line[0]} {line[1]}" for line in data]
-                    else:
-                        data = [x[0] for x in data]
-                        if args.dedup:
-                            data = list(set(data))
+    if args.format:
+        match args.format.lower():
+            case "txt":
+                word_paths = [start_block.word_paths for start_block in boggle_tree.values()]
+                data = list(chain(*word_paths))
+                if args.include_path:
+                    data = [f"{line[0]} {line[1]}" for line in data]
+                else:
+                    data = [x[0] for x in data]
+                    if args.dedup:
+                        data = list(set(data))
 
-                    if args.sort:
-                        data.sort()
+                if args.sort:
+                    data.sort()
 
-                    for line in data:
-                        print(line)
+                for line in data:
+                    print(line)
 
+            case "json":
+                data = { str(k):v.word_paths for k,v in boggle_tree.items()}
+                print(json.dumps(data, indent=2, sort_keys=True))
+            case _:
+                print(f"Invalid format (-f) option provided: \"{args.format}\"")
+                sys.exit()
 
-                case "json":
-                    pass
-                case _:
-                    print(f"Invalid format (-f) option provided: \"{args.format}\"")
-                    sys.exit()
+    else:
+        print("\nBOARD")
+        print(boggle_board)
 
-        else:
-            print("\nBOARD")
-            print(boggle_board)
-
-            for start_pos, tree in boggle_tree.items():
-                print(f"\nStarting @ {start_pos}...")
-                for word in tree.word_paths:
-                    print(f"{word[0]: <{boggle_board.max_word_len}}: {word[1]}")
-
-    except ValueError:
-        print("The [MAX_WORD_LENGTH] argument must be an integer.")
-        print("Please try again.")
-        sys.exit(1)
+        for start_pos, tree in boggle_tree.items():
+            print(f"\nStarting @ {start_pos}...")
+            for word in tree.word_paths:
+                print(f"{word[0]: <{boggle_board.max_word_len}}: {word[1]}")
 
 if __name__ == '__main__':
     main()
