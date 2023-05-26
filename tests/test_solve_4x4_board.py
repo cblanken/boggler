@@ -1,11 +1,9 @@
-import unittest
-from functools import reduce
 from itertools import chain
-from os import path
+from pathlib import Path
 import pytest
 from boggler.boggler_utils import BoggleBoard, build_full_boggle_tree
 
-WORDLISTS_DIR = path.abspath("./boggler/wordlists/dwyl/")
+WORDLISTS_DIR = Path("./boggler/wordlists/dwyl/").absolute()
 
 @pytest.fixture
 def board_4x4():
@@ -122,7 +120,7 @@ def board_4(board_4x4):
 
 @pytest.fixture
 def tree_4(board_4):
-    return build_full_boggle_tree(board_4, WORDLISTS_DIR)
+    return build_full_boggle_tree(board_4, Path(WORDLISTS_DIR))
 
 @pytest.fixture
 def found_words_4(tree_4):

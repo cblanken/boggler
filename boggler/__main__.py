@@ -44,7 +44,7 @@ def main():
         print("Invalid MAX_WORD_LENGTH. Please try again with a valid integer.")
         sys.exit()
 
-    boggle_tree = build_full_boggle_tree(boggle_board, args.wordlists)
+    boggle_tree = build_full_boggle_tree(boggle_board, Path(args.wordlists))
 
     if args.format:
         match args.format.lower():

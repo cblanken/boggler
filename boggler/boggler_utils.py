@@ -1,7 +1,6 @@
 '''Boggler Utils'''
 from __future__ import annotations
-#from pathlib import Path
-from os import path
+from pathlib import Path
 from multiprocessing import Pool
 import logging as log
 import functools
@@ -368,7 +367,7 @@ def build_boggle_tree(args):
     sub_tree = WordTree(alphabet, WordNode(cell.letters, False, board_pos=cell.pos))
     return dict_tree.build_boggle_tree(board, cell, sub_tree)
 
-def build_full_boggle_tree(board: BoggleBoard, wordlist_path: str) -> dict[str, WordTree]:
+def build_full_boggle_tree(board: BoggleBoard, wordlist_path: Path) -> dict[str, WordTree]:
     '''Return dictionary of WordTree(s) for every letter on a BoggleBoard'''
     alphabet = sorted(set([cell.letters for cell in board.board.values()]))
     board_tree = {}
@@ -386,7 +385,7 @@ def build_full_boggle_tree(board: BoggleBoard, wordlist_path: str) -> dict[str, 
 
         filename = "words_" + letters[0] + ".txt"
         try:
-            wordlist = read_wordlist(path.join(path.abspath(wordlist_path), filename))
+            wordlist = read_wordlist(Path(wordlist_path, filename))
             index[letters] = wordlist
             log.info(">> %s: %s", letters, filename)
         except FileNotFoundError:
@@ -411,15 +410,6 @@ def read_boggle_file(file):
     '''Return list of rows from Boggle board csv file'''
     with open(file, 'r', encoding='utf-8') as file:
         return [x.rstrip().split(',') for x in file.readlines()]
-
-def write_wordlist(filename: Path, filetype: str = "txt", sort: bool = False):
-    match filetype:
-        case "txt":
-            pass
-        case "json":
-            pass
-        case _:
-            pass
 
 def find_paths_by_word(board_letters, dictionary_path, max_len):
     '''Return list of paths by word'''

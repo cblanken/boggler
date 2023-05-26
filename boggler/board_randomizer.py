@@ -2,11 +2,11 @@
 from sys import argv, stderr
 from random import randint, shuffle
 from math import sqrt, floor
-from os import path
+from pathlib import Path
 
 def read_dice_file(dice_path: str):
     '''Return list of die strings from file ignoring all comments (#)'''
-    with open(path.abspath(dice_path), 'r+', encoding="utf-8") as file:
+    with open(Path.absolute(dice_path), 'r+', encoding="utf-8") as file:
         return [line.rstrip().split(',') for line in file.readlines() if line[0] != "#"]
 
 def roll_die(die: str):
@@ -38,7 +38,7 @@ if __name__ == '__main__':
         print('Usage: python3 board_randomizer.py <dice_file>')
     else:
         try:
-            dice = read_dice_file(path.abspath(argv[1]))
+            dice = read_dice_file(Path(argv[1]))
             board = get_random_board_csv(dice)
             for r in range(0, int(floor(sqrt(len(dice))))):
                 print(board[r])
