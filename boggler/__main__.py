@@ -1,5 +1,9 @@
 """Boggler Demo"""
+from pprint import pprint
 import argparse
+import json
+import csv
+from itertools import chain
 import sys
 from pathlib import Path
 from .boggler_utils import BoggleBoard, build_full_boggle_tree, read_boggle_file
@@ -16,6 +20,18 @@ parser.add_argument("wordlists", type=Path,
         the alphabet")
 parser.add_argument("max_word_length", nargs="?", type=int, default=16,
     help="Maximum length of words searched for on provided board")
+parser.add_argument("-f", "--format", type=str,
+    help="Specify alternative output format including [txt, json]")
+parser.add_argument("-p", "--include-path", action="store_true", default=False,
+    help="Include full paths for each word in output")
+parser.add_argument("-s", "--sort", action="store_true", default=False,
+    help="Sort output alphabetically. By default the results are sorted by the starting \
+          block position on the board from top-to-bottom, left-to-right as given in the \
+          board file.")
+parser.add_argument("-d", "--dedup", action="store_true", default=False,
+    help="Remove duplicates from word-only output. Note that de-duplication does not preserve \
+          the original order of the output, so it is recommended to also use the sort option when \
+          de-duplicating.")
 
 args = parser.parse_args()
 
@@ -31,13 +47,39 @@ def main():
     try:
         boggle_tree = build_full_boggle_tree(boggle_board, args.wordlists)
 
-        print("\nBOARD")
-        print(boggle_board)
+        if args.format:
+            match args.format.lower():
+                case "txt":
+                    word_paths = [start_block.word_paths for start_block in boggle_tree.values()]
+                    data = list(chain(*word_paths))
+                    if args.include_path:
+                        data = [f"{line[0]} {line[1]}" for line in data]
+                    else:
+                        data = [x[0] for x in data]
+                        if args.dedup:
+                            data = list(set(data))
 
-        for start_pos, tree in boggle_tree.items():
-            print(f"\nStarting @ {start_pos}...")
-            for word in tree.word_paths:
-                print(f"{word[0]: <{boggle_board.max_word_len}}: {word[1]}")
+                    if args.sort:
+                        data.sort()
+
+                    for line in data:
+                        print(line)
+
+
+                case "json":
+                    pass
+                case _:
+                    print(f"Invalid format (-f) option provided: \"{args.format}\"")
+                    sys.exit()
+
+        else:
+            print("\nBOARD")
+            print(boggle_board)
+
+            for start_pos, tree in boggle_tree.items():
+                print(f"\nStarting @ {start_pos}...")
+                for word in tree.word_paths:
+                    print(f"{word[0]: <{boggle_board.max_word_len}}: {word[1]}")
 
     except ValueError:
         print("The [MAX_WORD_LENGTH] argument must be an integer.")
