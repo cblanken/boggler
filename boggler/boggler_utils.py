@@ -262,7 +262,7 @@ class WordTree:
     def insert_node(self, letters: str, parent: WordNode, is_word: bool = False,
         children: dict[str, WordNode] = None, board_pos = None):
         '''Create WordNode for `letters` and into WordTree under `parent`'''
-        log.debug("inserting node: ", letters)
+        log.debug("inserting node: %s", letters)
         node = WordNode(letters, is_word, parent, children, board_pos)
         parent.add_child_node(node)
 
@@ -281,17 +281,17 @@ class WordTree:
         i_max = min(self.max_word_len, len(word))
         while i < i_max:
             letters = word[i]
-            log.debug("1 letter seq: ", word, letters, letters in curr_node.children)
+            log.debug("1 letter seq: %s %s %s", word, letters, letters in curr_node.children)
             if letters not in self.alphabet:
                 # Check two letter sequences like ("Qu", "Th", etc.) at current index
                 letters = word[i:i+2]
-                log.debug("2 letter seq: ", word, letters, letters in curr_node.children)
+                log.debug("2 letter seq: %s %s %s", word, letters, letters in curr_node.children)
                 if letters not in self.alphabet:
                     return False
             # Insert node
             if letters not in curr_node.children:
                 self.insert_node(letters, curr_node)
-                log.debug("3 letter seq: ", word, letters)
+                log.debug("3 letter seq: %s %s", word, letters)
 
             curr_node = curr_node.children[letters]
 
@@ -306,7 +306,7 @@ class WordTree:
         if len(word) == 0 or word is None:
             return curr_node
 
-        log.debug("Searching...", word, curr_node)
+        log.debug("Searching... %s %s", word, curr_node)
         if curr_node is None:
             curr_node = self.root
         for letters in curr_node.children:
@@ -337,14 +337,14 @@ class WordTree:
         if self.active_node.is_word and len(self.active_node.children) == 0:
             word_path = subtree.active_node.path[::-1]
             subtree.word_paths.append((subtree.active_node.get_word(board), word_path))
-            log.debug("1: WORD FOUND:", "".join([board.board[x].letters for x in word_path]), word_path)
+            log.debug("1: WORD FOUND: %s %s", "".join([board.board[x].letters for x in word_path]), word_path)
             self.active_node = self.active_node.parent
             subtree.active_node = subtree.active_node.parent
             return
         elif self.active_node.is_word:
             word_path = subtree.active_node.path[::-1]
             subtree.word_paths.append((subtree.active_node.get_word(board), word_path))
-            log.debug("2: WORD FOUND:", "".join([board.board[x].letters for x in word_path]), word_path)
+            log.debug("2: WORD FOUND: %s %s", "".join([board.board[x].letters for x in word_path]), word_path)
 
         # Branch for each adjacent board cell
         for cell in board_cell.adjacent_cells:
@@ -388,16 +388,16 @@ def build_full_boggle_tree(board: BoggleBoard, wordlist_path: str) -> dict[str, 
         try:
             wordlist = read_wordlist(path.join(path.abspath(wordlist_path), filename))
             index[letters] = wordlist
-            log.info(f">> {letters}: {filename}")
+            log.info(">> %s: %s", letters, filename)
         except FileNotFoundError:
-            log.info(f">> {letters}: -- Skipping -- no wordlist found for {letters}")
+            log.info(">> %s: -- Skipping -- no wordlist found for %s", letters, letters)
             index[letters] = {}
 
     log.info("Generating WordTrees...")
     params = [ [alphabet, board, cell, index[cell.letters] ] for cell in board.board.values()]
     with Pool(processes=len(board.board)) as pool:
         for i, res in enumerate(pool.map(build_boggle_tree, params)):
-            log.info(f">> {params[i][2]}")
+            log.info(">> %s", params[i][2])
             board_tree[params[i][2].pos] = res
 
     return board_tree
