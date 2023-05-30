@@ -406,10 +406,32 @@ def read_wordlist(file):
     with open(file, 'r', encoding='utf-8') as file:
         return file.read().split()
 
+class BadBoardFormat(Exception):
+    pass
+
 def read_boggle_file(file):
-    '''Return list of rows from Boggle board csv file'''
+    '''Return list of rows from Boggle board csv file
+
+    The size of the board is determined by the width (number of comma-separated values)
+        of the first (non-empty) line in the file.
+    
+    '''
     with open(file, 'r', encoding='utf-8') as file:
-        return [x.rstrip().split(',') for x in file.readlines()]
+        board = []
+
+        board.append([x.strip() for x in file.readline().split(",")])
+        board_size = len(board[0])
+        for line in file.readlines():
+            if line.strip() == "":
+                raise BadBoardFormat("board files must contain no blank lines")
+
+            row = [x.strip() for x in line.strip().split(',')]
+            if len(row) != board_size:
+                raise BadBoardFormat("the length of each row must be the same")
+
+            board.append(row)
+
+        return board
 
 def find_paths_by_word(board_letters, dictionary_path, max_len):
     '''Return list of paths by word'''
