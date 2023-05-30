@@ -4,9 +4,9 @@ from random import randint, shuffle
 from math import sqrt, floor
 from pathlib import Path
 
-def read_dice_file(dice_path: str):
+def read_dice_file(dice_path: Path):
     '''Return list of die strings from file ignoring all comments (#)'''
-    with open(Path.absolute(dice_path), 'r+', encoding="utf-8") as file:
+    with open(dice_path, 'r+', encoding="utf-8") as file:
         return [line.rstrip().split(',') for line in file.readlines() if line[0] != "#"]
 
 def roll_die(die: str):
@@ -44,5 +44,3 @@ if __name__ == '__main__':
                 print(board[r])
         except Exception as e:
             print("Argument must be a valid file path!", file=stderr)
-
-
