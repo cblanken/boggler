@@ -13,12 +13,12 @@ def fixture_expected_board_4x4():
         ['s', 'e', 'l', 'b']
     ]
 
-# Boards with clean input
 @pytest.fixture(name="clean_4x4_path")
 def fixture_clean_4x4_path():
     return Path(boards_path, "./boards/4x4_clean.board")
 
 def test_clean_4x4_board(expected_board_4x4, clean_4x4_path):
+    """Test 4x4 board with clean input"""
     assert expected_board_4x4 == read_boggle_file(clean_4x4_path)
 
 
@@ -28,6 +28,7 @@ def fixture_leading_whitespace_4x4_path():
     return Path(boards_path, "./boards/4x4_leading_whitespace.board")
 
 def test_leading_whitespace_4x4_board(expected_board_4x4, leading_whitespace_4x4_path):
+    """Test 4x4 board with leading whitepace in rows"""
     assert expected_board_4x4 == read_boggle_file(leading_whitespace_4x4_path)
 
 
@@ -37,6 +38,7 @@ def fixture_between_whitespace_4x4_path():
     return Path(boards_path, "./boards/4x4_between_whitespace.board")
 
 def test_between_whitespace_4x4_board(expected_board_4x4, between_whitespace_4x4_path):
+    """Test 4x4 board with whitespace surrounding letters in block"""
     assert expected_board_4x4 == read_boggle_file(between_whitespace_4x4_path)
 
 
@@ -46,6 +48,7 @@ def fixture_trailing_whitespace_4x4_path():
     return Path(boards_path, "./boards/4x4_trailing_whitespace.board")
 
 def test_trailing_whitespace_4x4_board(expected_board_4x4, trailing_whitespace_4x4_path):
+    """Test 4x4 board with trailing whitespace in rows"""
     assert expected_board_4x4 == read_boggle_file(trailing_whitespace_4x4_path)
 
 
@@ -55,6 +58,7 @@ def fixture_blank_lines_4x4_path():
     return Path(boards_path, "./boards/4x4_blank_lines.board")
 
 def test_blank_lines_4x4_board(blank_lines_4x4_path):
+    """Test 4x4 board with blank lines in board file"""
     with pytest.raises(BadBoardFormat, match="must contain no blank lines"):
         read_boggle_file(blank_lines_4x4_path)
 
@@ -65,5 +69,6 @@ def fixture_inconsistent_width_4x4_path():
     return Path(boards_path, "./boards/4x4_inconsistent_width.board")
 
 def test_inconsistent_width_4x4_board(inconsistent_width_4x4_path):
+    """Test board with irregular number of blocks per row"""
     with pytest.raises(BadBoardFormat, match="length of each row must be the same"):
         read_boggle_file(inconsistent_width_4x4_path)
