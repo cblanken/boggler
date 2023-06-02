@@ -1,11 +1,12 @@
 """Boggler Demo"""
-from pprint import pprint
 import argparse
 import json
-import csv
 from itertools import chain
 import sys
 from pathlib import Path
+from rich.console import Console
+from rich.table import Table
+from rich import box
 from .boggler_utils import BoggleBoard, build_full_boggle_tree, read_boggle_file
 
 parser = argparse.ArgumentParser(
@@ -72,13 +73,28 @@ def main():
                 sys.exit()
 
     else:
+        console = Console()
         print("\nBOARD")
         print(boggle_board)
 
         for start_pos, tree in boggle_tree.items():
-            print(f"\nStarting @ {start_pos}...")
+            table = Table(
+                title=f"Starting @ {start_pos}",
+                show_header=True,
+                header_style="bold purple",
+                row_styles=["dim", ""],
+                box=box.ROUNDED
+            )
+            table.add_column("Word")
+            table.add_column("Path")
             for word in tree.word_paths:
-                print(f"{word[0]: <{boggle_board.max_word_len}}: {word[1]}")
+                #print(f"{word[0]: <{boggle_board.max_word_len}}: {word[1]}")
+                table.add_row(
+                    f"{word[0]}",
+                    f"{word[1]}"
+                )
+
+            console.print(table)
 
 if __name__ == '__main__':
     main()
