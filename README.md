@@ -6,7 +6,8 @@ A solver for the popular word game Boggle.
 pip install boggler
 ```
 
-To use the script to solve a particular Boggle board configuration, you'll need to do a few things
+# Setup
+To use the script to solve a Boggle board, you'll need to do a few things first.
 1. Create `.csv` of the board state like so:
 
     Here is an example `board.csv`. Note the orientation of the board does not matter.
@@ -17,7 +18,7 @@ To use the script to solve a particular Boggle board configuration, you'll need 
     d,f,e,y
     n,m,e,qu
     ```
-2. Find a dictionary wordlist file or create your own
+2. Find or create a dictionary wordlist file or create your own
 
     The dictionary wordlist should have each word on a single line like so
     ```console
@@ -57,9 +58,9 @@ To use the script to solve a particular Boggle board configuration, you'll need 
     ```
 
 # Usage
-### CLI usage
-```console
-$ poetry run boggler --help
+<details>
+<summary><h3 style="display: inline">CLI usage</h3></summary>
+<pre><code>$ poetry run boggler --help
 usage: boggler [-h] [-f FORMAT] [-p] [-s] [-d] board wordlists [max_word_length]
 
 Boggle board game solver
@@ -79,11 +80,12 @@ options:
                         to-right as given in the board file.
   -d, --dedup           Remove duplicates from word-only output. Note that de-duplication does not preserve the original order of the output, so it is
                         recommended to also use the sort option when de-duplicating.
-```
+</code></pre>
+</details>
 
-### Example
-```console
-$ poetry run boggler ./boggler/boards/b1.csv boggler/wordlists/scrabble_2019/
+<details>
+<summary><h3 style="display: inline">Example board solve</h3></summary>
+<pre><code>$ poetry run boggler ./boggler/boards/b1.csv boggler/wordlists/scrabble_2019/
 
 BOARD
 +---------------+
@@ -380,12 +382,13 @@ Starting @ (2,
 │ ah     │ [(3, 3), (3, 2)]                                 │
 │ ahs    │ [(3, 3), (3, 2), (2, 3)]                         │
 ╰────────┴──────────────────────────────────────────────────╯
-```
+</code></pre>
+</details>
+<br>
 
 # Build
 Navigate to the project root folder and run the following.
 Run `poetry build`
-```
 
 # License
 The included [wordlists](src/boggler/wordlists) are covered by their respective licenses. All other files MIT © Cameron Blankenbuehler
