@@ -4,7 +4,7 @@ if [ -z $1 ] || [ -z $2 ]; then
     echo "Usage: WORDLIST OUT_DIR"
     exit 0
 else
-    rg "(^a[a-z]+).*$" -or '$1' $1 | sort | uniq > "$2/words_a.txt" 
+    rg "(^a[a-z]+).*$" -or '$1' $1 | sort | uniq > "$2/words_a.txt"
     rg "(^b[a-z]+).*$" -or '$1' $1 | sort | uniq > "$2/words_b.txt"
     rg "(^c[a-z]+).*$" -or '$1' $1 | sort | uniq > "$2/words_c.txt"
     rg "(^d[a-z]+).*$" -or '$1' $1 | sort | uniq > "$2/words_d.txt"

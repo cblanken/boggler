@@ -108,7 +108,7 @@ void free_board(Board *b) {
     }
 }
 //Vec2[] get_adjacent_indexes(uint8_t board_size, Vec2 pos) {
-//    // Calculate total possible number of adjacent cells 
+//    // Calculate total possible number of adjacent cells
 //    uint16_t = total_adj_cell_cnt = ((board-size-2) * (board-size-2) * 8) + ((board-size-2) * 4 * 5) + (4 * 3);
 //
 //    Vec2[] indexes = malloc(8 * sizeof(Vec2));

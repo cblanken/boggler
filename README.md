@@ -8,7 +8,7 @@ pip install boggler
 
 To use the script to solve a particular Boggle board configuration, you'll need to do a few things
 1. Create `.csv` of the board state like so:
-    
+
     Here is an example `board.csv`. Note the orientation of the board does not matter.
     ```console
     $ cat board.csv
@@ -45,7 +45,7 @@ To use the script to solve a particular Boggle board configuration, you'll need 
 
     To split an English wordlist the `split_wordlist_alpha.sh` script can be used like so:
     ```console
-    $ split_wordlist_alpha.sh my_wordlist.txt . 
+    $ split_wordlist_alpha.sh my_wordlist.txt .
     ```
     This will generate a series of sub-dictionaries for each letter in the alphabet in the current directory.
     ```console

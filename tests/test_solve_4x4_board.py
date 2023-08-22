@@ -5,14 +5,16 @@ from boggler.boggler_utils import BoggleBoard, build_full_boggle_tree
 
 WORDLISTS_DIR = Path("./boggler/wordlists/dwyl/").absolute()
 
+
 @pytest.fixture
 def board_4x4():
     return [
-        ['u','n','r','e'],
-        ['qu','n','i','l'],
-        ['i','s','h','a'],
-        ['s','e','l','b']
+        ["u", "n", "r", "e"],
+        ["qu", "n", "i", "l"],
+        ["i", "s", "h", "a"],
+        ["s", "e", "l", "b"],
     ]
+
 
 @pytest.fixture
 def expected_words_max_4():
@@ -345,15 +347,65 @@ def expected_words_max_4():
         ("blah", [(3, 3), (3, 2), (2, 3), (2, 2)]),
     ]
 
+
 @pytest.fixture
 def expected_words_max_20():
     return [
         ("u", [(0, 0)]),
         ("un", [(0, 0), (1, 1)]),
         ("unn", [(0, 0), (1, 1), (0, 1)]),
-        ("unrelinquishable", [(0, 0), (1, 1), (0, 2), (0, 3), (1, 3), (1, 2), (0, 1), (1, 0), (2, 0), (2, 1), (2, 2), (2, 3), (3, 3), (3, 2), (3, 1)]),
-        ("unrelishable", [(0, 0), (1, 1), (0, 2), (0, 3), (1, 3), (1, 2), (2, 1), (2, 2), (2, 3), (3, 3), (3, 2), (3, 1)]),
-        ("unreliable", [(0, 0), (1, 1), (0, 2), (0, 3), (1, 3), (1, 2), (2, 3), (3, 3), (3, 2), (3, 1)]),
+        (
+            "unrelinquishable",
+            [
+                (0, 0),
+                (1, 1),
+                (0, 2),
+                (0, 3),
+                (1, 3),
+                (1, 2),
+                (0, 1),
+                (1, 0),
+                (2, 0),
+                (2, 1),
+                (2, 2),
+                (2, 3),
+                (3, 3),
+                (3, 2),
+                (3, 1),
+            ],
+        ),
+        (
+            "unrelishable",
+            [
+                (0, 0),
+                (1, 1),
+                (0, 2),
+                (0, 3),
+                (1, 3),
+                (1, 2),
+                (2, 1),
+                (2, 2),
+                (2, 3),
+                (3, 3),
+                (3, 2),
+                (3, 1),
+            ],
+        ),
+        (
+            "unreliable",
+            [
+                (0, 0),
+                (1, 1),
+                (0, 2),
+                (0, 3),
+                (1, 3),
+                (1, 2),
+                (2, 3),
+                (3, 3),
+                (3, 2),
+                (3, 1),
+            ],
+        ),
         ("unrein", [(0, 0), (1, 1), (0, 2), (0, 3), (1, 2), (0, 1)]),
         ("uns", [(0, 0), (1, 1), (2, 1)]),
         ("unsin", [(0, 0), (1, 1), (2, 1), (1, 2), (0, 1)]),
@@ -371,9 +423,58 @@ def expected_words_max_20():
         ("unn", [(0, 0), (0, 1), (1, 1)]),
         ("uni", [(0, 0), (0, 1), (1, 2)]),
         ("unie", [(0, 0), (0, 1), (1, 2), (0, 3)]),
-        ("unrelishable", [(0, 0), (0, 1), (0, 2), (0, 3), (1, 3), (1, 2), (2, 1), (2, 2), (2, 3), (3, 3), (3, 2), (3, 1)]),
-        ("unreliable", [(0, 0), (0, 1), (0, 2), (0, 3), (1, 3), (1, 2), (2, 3), (3, 3), (3, 2), (3, 1)]),
-        ("unrelinquishable", [(0, 0), (0, 1), (0, 2), (0, 3), (1, 3), (1, 2), (1, 1), (1, 0), (2, 0), (2, 1), (2, 2), (2, 3), (3, 3), (3, 2), (3, 1)]),
+        (
+            "unrelishable",
+            [
+                (0, 0),
+                (0, 1),
+                (0, 2),
+                (0, 3),
+                (1, 3),
+                (1, 2),
+                (2, 1),
+                (2, 2),
+                (2, 3),
+                (3, 3),
+                (3, 2),
+                (3, 1),
+            ],
+        ),
+        (
+            "unreliable",
+            [
+                (0, 0),
+                (0, 1),
+                (0, 2),
+                (0, 3),
+                (1, 3),
+                (1, 2),
+                (2, 3),
+                (3, 3),
+                (3, 2),
+                (3, 1),
+            ],
+        ),
+        (
+            "unrelinquishable",
+            [
+                (0, 0),
+                (0, 1),
+                (0, 2),
+                (0, 3),
+                (1, 3),
+                (1, 2),
+                (1, 1),
+                (1, 0),
+                (2, 0),
+                (2, 1),
+                (2, 2),
+                (2, 3),
+                (3, 3),
+                (3, 2),
+                (3, 1),
+            ],
+        ),
         ("unrein", [(0, 0), (0, 1), (0, 2), (0, 3), (1, 2), (1, 1)]),
         ("n", [(0, 1)]),
         ("ni", [(0, 1), (1, 2)]),
@@ -414,14 +515,64 @@ def expected_words_max_20():
         ("re", [(0, 2), (0, 3)]),
         ("rel", [(0, 2), (0, 3), (1, 3)]),
         ("relais", [(0, 2), (0, 3), (1, 3), (2, 3), (1, 2), (2, 1)]),
-        ("relinquish", [(0, 2), (0, 3), (1, 3), (1, 2), (0, 1), (1, 0), (2, 0), (2, 1), (2, 2)]),
-        ("relinquishes", [(0, 2), (0, 3), (1, 3), (1, 2), (0, 1), (1, 0), (2, 0), (2, 1), (2, 2), (3, 1), (3, 0)]),
+        (
+            "relinquish",
+            [(0, 2), (0, 3), (1, 3), (1, 2), (0, 1), (1, 0), (2, 0), (2, 1), (2, 2)],
+        ),
+        (
+            "relinquishes",
+            [
+                (0, 2),
+                (0, 3),
+                (1, 3),
+                (1, 2),
+                (0, 1),
+                (1, 0),
+                (2, 0),
+                (2, 1),
+                (2, 2),
+                (3, 1),
+                (3, 0),
+            ],
+        ),
         ("relish", [(0, 2), (0, 3), (1, 3), (1, 2), (2, 1), (2, 2)]),
         ("relishes", [(0, 2), (0, 3), (1, 3), (1, 2), (2, 1), (2, 2), (3, 1), (3, 0)]),
-        ("relishable", [(0, 2), (0, 3), (1, 3), (1, 2), (2, 1), (2, 2), (2, 3), (3, 3), (3, 2), (3, 1)]),
+        (
+            "relishable",
+            [
+                (0, 2),
+                (0, 3),
+                (1, 3),
+                (1, 2),
+                (2, 1),
+                (2, 2),
+                (2, 3),
+                (3, 3),
+                (3, 2),
+                (3, 1),
+            ],
+        ),
         ("reliable", [(0, 2), (0, 3), (1, 3), (1, 2), (2, 3), (3, 3), (3, 2), (3, 1)]),
-        ("relinquish", [(0, 2), (0, 3), (1, 3), (1, 2), (1, 1), (1, 0), (2, 0), (2, 1), (2, 2)]),
-        ("relinquishes", [(0, 2), (0, 3), (1, 3), (1, 2), (1, 1), (1, 0), (2, 0), (2, 1), (2, 2), (3, 1), (3, 0)]),
+        (
+            "relinquish",
+            [(0, 2), (0, 3), (1, 3), (1, 2), (1, 1), (1, 0), (2, 0), (2, 1), (2, 2)],
+        ),
+        (
+            "relinquishes",
+            [
+                (0, 2),
+                (0, 3),
+                (1, 3),
+                (1, 2),
+                (1, 1),
+                (1, 0),
+                (2, 0),
+                (2, 1),
+                (2, 2),
+                (3, 1),
+                (3, 0),
+            ],
+        ),
         ("rei", [(0, 2), (0, 3), (1, 2)]),
         ("rein", [(0, 2), (0, 3), (1, 2), (0, 1)]),
         ("reis", [(0, 2), (0, 3), (1, 2), (2, 1)]),
@@ -839,6 +990,7 @@ def expected_words_max_20():
         ("bless", [(3, 3), (3, 2), (3, 1), (3, 0), (2, 1)]),
     ]
 
+
 # -----------------------------------------------------
 # Solved board max 4-letter words
 # -----------------------------------------------------
@@ -848,24 +1000,32 @@ def expected_words_max_20():
 def board_4(board_4x4):
     return BoggleBoard(board_4x4, 4)
 
+
 @pytest.fixture
 def tree_4(board_4):
     return build_full_boggle_tree(board_4, Path(WORDLISTS_DIR))
+
 
 @pytest.fixture
 def found_words_4(tree_4):
     return list(chain.from_iterable([x.word_paths for x in tree_4.values()]))
 
+
 # Tests for solved board with max of 4-letter words
 def test_word_count_4_board_4x4_max(expected_words_max_4, tree_4):
-    assert len(expected_words_max_4) == sum(map(lambda x: len(x.word_paths), tree_4.values()))
+    assert len(expected_words_max_4) == sum(
+        map(lambda x: len(x.word_paths), tree_4.values())
+    )
+
 
 def test_words_full_4_board_4x4_max(expected_words_max_4, found_words_4):
     """Verify words and paths match in exact order"""
     assert found_words_4 == expected_words_max_4
 
+
 def test_format_words_4_to_csv():
     pass
+
 
 def test_format_words_4_to_json():
     pass
@@ -880,23 +1040,31 @@ def test_format_words_4_to_json():
 def board_20(board_4x4):
     return BoggleBoard(board_4x4, 20)
 
+
 @pytest.fixture
 def tree_20(board_20):
     return build_full_boggle_tree(board_20, WORDLISTS_DIR)
+
 
 @pytest.fixture
 def found_words_20(tree_20):
     return list(chain.from_iterable([x.word_paths for x in tree_20.values()]))
 
+
 # Tests for solved board with max of 20-letter words
 def test_word_count_20_board_4x4_max(expected_words_max_20, tree_20):
-    assert len(expected_words_max_20) == sum(map(lambda x: len(x.word_paths), tree_20.values()))
+    assert len(expected_words_max_20) == sum(
+        map(lambda x: len(x.word_paths), tree_20.values())
+    )
+
 
 def test_words_full_20_board_4x4_max(expected_words_max_20, found_words_20):
     assert found_words_20 == expected_words_max_20
 
+
 def test_format_words_20_to_csv():
     pass
+
 
 def test_format_words_20_to_json():
     pass
