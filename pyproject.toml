@@ -28,6 +28,7 @@ readme = "README.md"
 [tool.poetry.dependencies]
 python = "^3.11"
 rich = "^13.4.1"
+pygtrie = "^2.5.0"
 
 [tool.poetry.scripts]
 boggler = "boggler.__main__:main"
