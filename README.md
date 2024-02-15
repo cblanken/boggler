@@ -391,4 +391,4 @@ Navigate to the project root folder and run the following.
 Run `poetry build`
 
 # License
-The included [wordlists](src/boggler/wordlists) are covered by their respective licenses. All other files MIT © Cameron Blankenbuehler
+The included [wordlists](boggler/wordlists) are covered by their respective licenses. All other files [MIT](LICENSE) © Cameron Blankenbuehler
