@@ -18,7 +18,7 @@ To use the script to solve a Boggle board, you'll need to do a few things first.
     d,f,e,y
     n,m,e,qu
     ```
-2. Find or create a dictionary wordlist file or create your own
+2. Find or create a dictionary wordlist file
 
     The dictionary wordlist should have each word on a single line like so
     ```console
@@ -44,7 +44,7 @@ To use the script to solve a Boggle board, you'll need to do a few things first.
 
 3. Split the dictionary wordlist into separate files based on the first letter of each word.
 
-    To split an English wordlist the `split_wordlist_alpha.sh` script can be used like so:
+    To split an English wordlist, use the `split_wordlist_alpha.sh` script like so:
     ```console
     $ split_wordlist_alpha.sh my_wordlist.txt .
     ```
@@ -97,7 +97,6 @@ BOARD
 +---------------+
 | O | W | H | A |
 +---------------+
-
                                Starting @ (0, 0)
 ╭──────────┬──────────────────────────────────────────────────────────────────╮
 │ Word     │ Path                                                             │
@@ -142,8 +141,7 @@ BOARD
 │ aia    │ [(0, 1), (0, 2), (1, 2)]                         │
 │ aias   │ [(0, 1), (0, 2), (1, 2), (2, 3)]                 │
 ╰────────┴──────────────────────────────────────────────────╯
-Starting @ (0,
-      2)
+Starting @ (0,2)
 ╭──────┬──────╮
 │ Word │ Path │
 ├──────┼──────┤
@@ -254,8 +252,7 @@ Starting @ (0,
 │ yap  │ [(1, 3), (1, 2), (0, 3)] │
 │ yas  │ [(1, 3), (1, 2), (2, 3)] │
 ╰──────┴──────────────────────────╯
-Starting @ (2,
-      0)
+Starting @ (2, 0)
 ╭──────┬──────╮
 │ Word │ Path │
 ├──────┼──────┤
