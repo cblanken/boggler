@@ -1,8 +1,14 @@
 """Module to generate random Boggle boards for testing"""
+
 from sys import argv, stderr
 from random import randint, shuffle
 from math import sqrt, floor
 from pathlib import Path
+from typing import List, TypeAlias
+
+
+Die: TypeAlias = List[str]
+Dice: TypeAlias = List[Die]
 
 
 def read_dice_file(dice_path: Path):
@@ -11,17 +17,17 @@ def read_dice_file(dice_path: Path):
         return [line.rstrip().split(",") for line in file.readlines() if line[0] != "#"]
 
 
-def roll_die(die: str):
+def roll_die(die: Die):
     """Return a face of the given die string to simulate rolling a die"""
     return str(die[randint(0, len(die) - 1)])
 
 
-def roll_dice(dice: list[str]):
+def roll_dice(dice: Dice):
     """Return a random roll for each die"""
     return [roll_die(die) for die in dice]
 
 
-def get_random_board(dice: list[str]):
+def get_random_board(dice: Dice):
     shuffle(dice)
     rolls = roll_dice(dice)
 
@@ -33,7 +39,7 @@ def get_random_board(dice: list[str]):
     return board
 
 
-def get_random_board_csv(dice: list[str]):
+def get_random_board_csv(dice: Dice):
     board = get_random_board(dice)
     board = [",".join(row) for row in board]
     return board
@@ -49,4 +55,4 @@ if __name__ == "__main__":
             for r in range(0, int(floor(sqrt(len(dice))))):
                 print(board[r])
         except Exception as e:
-            print("Argument must be a valid file path!", file=stderr)
+            print("Argument must be a valid file path.", file=stderr)
