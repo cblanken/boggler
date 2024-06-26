@@ -4,7 +4,7 @@
 
 [tool.poetry]
 name = "boggler"
-version = "2.0.3"
+version = "2.0.4"
 description = "Utilities for solving the Boggle word game."
 authors = ["Cameron Blankenbuehler <cameron.blankenbuehler@gmail.com>"]
 license = "LICENSE"
