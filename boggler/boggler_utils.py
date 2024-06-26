@@ -1,4 +1,5 @@
 """Boggler Utils"""
+
 from __future__ import annotations
 from pathlib import Path
 from multiprocessing import Pool
@@ -95,22 +96,22 @@ class BoggleBoard:
             body += header
         return f"{header}{body}"
 
-    @property
+    @functools.cached_property
     def height(self) -> int:
         """Getter for height property"""
         return self.__height
 
-    @property
+    @functools.cached_property
     def width(self) -> int:
         """Getter for width property"""
         return self.__width
 
-    @property
+    @functools.cached_property
     def max_word_len(self) -> int:
         """Getter for maximum word length property"""
         return self.__max_word_len
 
-    @property
+    @functools.cached_property
     def board(self) -> dict[tuple[int, int], BoardCell]:
         """Getter for board property"""
         return self.__board
@@ -158,10 +159,15 @@ class WordNode:
         self.__parent = parent
         self.__board_pos = board_pos
 
-    @property
+    @functools.cached_property
     def letters(self) -> str:
         """Getter for letter property"""
         return self.__letters
+
+    @functools.cached_property
+    def letters_count(self) -> int:
+        """Getter for letters count"""
+        return len(self.__letters)
 
     @property
     def is_word(self) -> bool:
@@ -172,7 +178,7 @@ class WordNode:
     def is_word(self, value):
         self.__is_word = value
 
-    @property
+    @functools.cached_property
     def children(self) -> dict[str, WordNode]:
         """Getter for children property"""
         return self.__children
@@ -221,7 +227,7 @@ class WordTree:
         self,
         alphabet: list[str],
         root: WordNode,
-        words: list[str] = None,
+        words: list[str] | None = None,
         max_word_len=16,
     ) -> None:
         self.__alphabet = alphabet
@@ -240,27 +246,27 @@ class WordTree:
             for word in words:
                 self.__insert_word(word)
 
-    @property
+    @functools.cached_property
     def alphabet(self) -> list:
         """Getter for alphabet property"""
         return self.__alphabet
 
     @property
-    def wordlist(self) -> list[str]:
+    def wordlist(self) -> list[str] | None:
         """Getter for wordlist property"""
         return self.__wordlist
 
-    @property
+    @functools.cached_property
     def root(self) -> WordNode:
         """Getter for root property"""
         return self.__root
 
-    @property
+    @functools.cached_property
     def max_word_len(self) -> int:
         """Getter for max_word_len property"""
         return self.__max_word_len
 
-    @property
+    @functools.cached_property
     def tree(self) -> dict[str, WordNode]:
         """Getter for tree property"""
         return self.__tree
@@ -289,7 +295,6 @@ class WordTree:
         board_pos=None,
     ):
         """Create WordNode for `letters` and into WordTree under `parent`"""
-        log.debug("inserting node: %s", letters)
         node = WordNode(letters, is_word, parent, children, board_pos)
         parent.add_child_node(node)
 
@@ -298,41 +303,31 @@ class WordTree:
         otherwise returns False"""
 
         # Insert root node
-        prefix = word[0 : len(self.root.letters)]  # prefix = first letter block
+        prefix = word[0 : self.root.letters_count]  # prefix = first letter block
         if word is None or prefix != self.root.letters:
             return False
         curr_node = self.tree[prefix]
         word_len = len(word)
 
         i = len(prefix)
-        i_max = min(self.max_word_len, len(word))
+        i_max = min(self.max_word_len, word_len)
         while i < i_max:
             letters = word[i]
-            log.debug(
-                "1 letter seq: %s %s %s", word, letters, letters in curr_node.children
-            )
             if letters not in self.alphabet:
                 # Check two letter sequences like ("Qu", "Th", etc.) at current index
                 letters = word[i : i + 2]
-                log.debug(
-                    "2 letter seq: %s %s %s",
-                    word,
-                    letters,
-                    letters in curr_node.children,
-                )
                 if letters not in self.alphabet:
                     return False
             # Insert node
             if letters not in curr_node.children:
                 self.insert_node(letters, curr_node)
-                log.debug("3 letter seq: %s %s", word, letters)
 
             curr_node = curr_node.children[letters]
 
             i += len(letters)
 
         # Mark the last node as a word
-        curr_node.is_word = len(word) <= self.max_word_len
+        curr_node.is_word = word_len <= self.max_word_len
         return True
 
     def search(self, word: str, curr_node=None) -> WordNode:
@@ -373,7 +368,7 @@ class WordTree:
         """
 
         if word_len > self.max_word_len or word_len >= board.max_word_len:
-            log.debug(f"MAX WORD LENGTH REACHED! len = {word_len}")
+            # MAX WORD LENGTH REACHED!
             subtree.active_node = subtree.active_node.parent
             self.active_node = self.active_node.parent
             return subtree
@@ -382,22 +377,15 @@ class WordTree:
         if self.active_node.is_word and len(self.active_node.children) == 0:
             word_path = subtree.active_node.path[::-1]
             subtree.word_paths.append((subtree.active_node.get_word(board), word_path))
-            log.debug(
-                "1: WORD FOUND: %s %s",
-                "".join([board.board[x].letters for x in word_path]),
-                word_path,
-            )
+
+            # Word found
             self.active_node = self.active_node.parent
             subtree.active_node = subtree.active_node.parent
             return subtree
         elif self.active_node.is_word:
+            # Word found
             word_path = subtree.active_node.path[::-1]
             subtree.word_paths.append((subtree.active_node.get_word(board), word_path))
-            log.debug(
-                "2: WORD FOUND: %s %s",
-                "".join([board.board[x].letters for x in word_path]),
-                word_path,
-            )
 
         # Branch for each adjacent board cell
         for cell in board_cell.adjacent_cells:
